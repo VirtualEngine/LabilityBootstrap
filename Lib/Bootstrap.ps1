@@ -100,9 +100,18 @@ if (-not ($prinipalContext.ValidateCredentials('Administrator', $unsecuredString
 }
 Write-Host 'OK!' -ForegroundColor Green;
 
+## Test PowerShell remoting to be able to "push" DSC configuration..
 Write-Host "Testing PSRemoting... " -ForegroundColor Cyan -NoNewline;
 if (-not (Test-WSMan -ComputerName $env:COMPUTERNAME)) {
     Enable-PSRemoting -SkipNetworkProfileCheck -Force -ErrorAction Stop;
+}
+Write-Host 'OK!' -ForegroundColor Green;
+
+## Test WSMan\MaxEnvelopeSizeKb..
+Write-Host "Testing WSMan... " -ForegroundColor Cyan -NoNewline;
+$maxEnvelopeSizeKb = (Get-WSManInstance -ResourceURI winrm/config).MaxEnvelopeSizekb -as [System.Int32];
+if ($maxEnvelopeSizeKb -lt 1024) {
+    [ref] $null = Set-WSManInstance -ResourceURI winrm/config -ValueSet @{ MaxEnvelopeSizekb = '1024'; }
 }
 Write-Host 'OK!' -ForegroundColor Green;
 
@@ -129,8 +138,7 @@ Get-ChildItem -Path "$PSScriptRoot\Modules" | ForEach-Object {
 
 } #end modules
 
-Write-Host ("Deplying resources..") -ForegroundColor Cyan;
-
+Write-Host ("Deploying resources..") -ForegroundColor Cyan;
 $resourcePath = Join-Path -Path $PSScriptRoot -ChildPath Resources;
 foreach ($resourceId in $nodeData.Resource) {
 
@@ -153,7 +161,7 @@ if ($PSCmdlet.ShouldProcess($sourceMetaMofPath, 'Configure LCM')) {
     $tempPath = Join-Path -Path $env:SystemRoot -ChildPath 'Temp';
     $localhostMetaMofPath = Join-Path -Path $tempPath -ChildPath 'localhost.meta.mof';    
     Copy-Item -Path $sourceMetaMofPath -Destination $localhostMetaMofPath -Confirm:$false -Verbose:$false -Force;
-    Set-DscLocalConfigurationManager -Path $tempPath -Force -ErrorAction Stop;
+    Set-DscLocalConfigurationManager -Path $tempPath -ErrorAction Stop;
 
 } #end LCM
 

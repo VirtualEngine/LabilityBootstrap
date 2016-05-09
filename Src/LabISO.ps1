@@ -1,190 +1,86 @@
-<# Inspiration from
-        http://blogs.msdn.com/b/opticalstorage/archive/2010/08/13/writing-optical-discs-using-imapi-2-in-powershell.aspx
-    and
-        http://tools.start-automating.com/Install-ExportISOCommand/
-    with help from
-        http://stackoverflow.com/a/9802807/223837 #>
-
-$writeDVDScriptBlock = {
-    
-    param (
-        [Parameter(Mandatory)]
-        [System.Object[]] $Path,
-        
-        [Parameter()] [ValidateNotNullOrEmpty()]
-        [System.String] $DestinationPath = "$(Get-Location -PSProvider FileSystem)\$((Get-Date).ToString('yyyyMMdd')).iso",
-
-        [Parameter()] [ValidateNotNullOrEmpty()]
-        [System.String] $VolumeName = 'New-ISO',
-        
-        [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
-        [System.String] $DebugPreference,
-        
-        [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
-        [System.String] $VerbosePreference,
-        
-        [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
-        [System.String] $WarningPreference,
-        
-        [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
-        [System.String] $ErrorActionPreference
-    )
-    
-    function WriteIStreamToFile {
-        [CmdletBinding()]
-        param (
-            [Parameter(Mandatory)]
-            [__ComObject] $IStream,
-            
-            [Parameter(Mandatory)]
-            [System.String] $DestinationPath
-        )
-        process {
-            # NOTE: We cannot use [System.Runtime.InteropServices.ComTypes.IStream],
-            # since PowerShell apparently cannot convert an IStream COM object to this
-            # Powershell type.  (See http://stackoverflow.com/a/9037299/223837 for
-            # details.)
-            #
-            # It turns out that .NET/CLR _can_ do this conversion.
-            #
-            # That is the reason why method FileUtil.WriteIStreamToFile(), below,
-            # takes an object, and casts it to an IStream, instead of directly
-            # taking an IStream inputStream argument.
-
-            $compilerParameters = New-Object -TypeName 'CodeDom.Compiler.CompilerParameters';
-            $compilerParameters.CompilerOptions = '/unsafe';
-            $compilerParameters.WarningLevel = 4;
-            $compilerParameters.TreatWarningsAsErrors = $true;
-
-            if (-not ('FileUtil' -as [System.Type])) { 
-
-                Add-Type -CompilerParameters $compilerParameters -TypeDefinition @'
-                    using System;
-                    using System.IO;
-                    using System.Runtime.InteropServices.ComTypes;
-
-                    namespace My
-                    {
-
-                        public static class FileUtil {
-                            public static void WriteIStreamToFile(object i, string fileName) {
-                                IStream inputStream = i as IStream;
-                                FileStream outputFileStream = File.OpenWrite(fileName);
-                                int bytesRead = 0;
-                                int offset = 0;
-                                byte[] data;
-                                do {
-                                    data = Read(inputStream, 2048, out bytesRead);  
-                                    outputFileStream.Write(data, 0, bytesRead);
-                                    offset += bytesRead;
-                                } while (bytesRead == 2048);
-                                outputFileStream.Flush();
-                                outputFileStream.Close();
-                            }
-
-                            unsafe static private byte[] Read(IStream stream, int toRead, out int read) {
-                                byte[] buffer = new byte[toRead];
-                                int bytesRead = 0;
-                                int* ptr = &bytesRead;
-                                stream.Read(buffer, toRead, (IntPtr)ptr);   
-                                read = bytesRead;
-                                return buffer;
-                            } 
-                        }
-
-                    }
-'@
-            }
-        
-            if (-not (Test-Path -Path $DestinationPath -IsValid)) {
-                throw ($localized.InvalidDestinationPathError -f $DestinationPath);
-            }
-            [My.FileUtil]::WriteIStreamToFile($IStream, $DestinationPath);
-
-        } #end process
-    } #end function WriteIStreamToFile
-
-    $fsi = New-Object -ComObject IMAPI2FS.MsftFileSystemImage;
-    $fsi.VolumeName = $VolumeName;
-    $fsi.ChooseImageDefaultsForMediaType(12);
-    
-    foreach ($pathItem in $Path) {
-        if ($pathItem -is [System.String]) {
-            $pathItem = Get-Item -Path $pathItem;
-        }
-        
-        if ($pathItem -is [System.IO.FileInfo]) {
-            Write-Verbose ("Adding file '{0}'." -f $pathItem.FullName);
-            $fsi.Root.AddTree($pathItem.FullName, $true);
-        }
-        elseif ($pathItem -is [System.IO.DirectoryInfo]) {
-            Get-ChildItem -Path $pathItem.FullName | ForEach-Object {
-                Write-Verbose ("Adding directory '{0}." -f $PSItem.FullName);
-                $fsi.Root.AddTree($PSItem.FullName, $true);
-            }
-        }
-    } #end foreach item
-    
-    Write-Verbose ("Writing ISO '{0}'." -f $DestinationPath);
-    WriteIStreamToFile -IStream $fsi.CreateResultImage().ImageStream -DestinationPath $DestinationPath;
-    return Get-Item -Path $DestinationPath;
-
-} #end writeDVDScriptBlock
-
-function New-LabISO {
+function New-LabIso {
 <#
     .SYNOPSIS
-        Creates the Lability Bootstrap ISO.
+        Creates a new Lability Bootstrap ISO image.
 #>
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = 'PSCredential', SupportsShouldProcess)]
     [OutputType([System.IO.FileInfo])]
     param (
-        ## Direct
-        [Parameter(Mandatory, ValueFromPipeline)]
-        [System.Object[]] $Path,
+        ## Specifies a PowerShell DSC configuration document (.psd1) containing the lab configuration.
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [System.String] $ConfigurationData,
 
-        [Parameter(ValueFromPipelineByPropertyName)]
-        [System.String] $DestinationPath = "$(Get-Location -PSProvider FileSystem)\$((Get-Date).ToString('yyyyMMdd')).iso",
-
-        [Parameter()] [ValidateNotNullOrEmpty()]
-        [System.String] $VolumeName = 'New-ISO',
+        ## Target Lability bootstrap ISO file path
+        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
+        [System.String] $DestinationPath,
         
-        [Parameter()]
-        [System.Management.Automation.SwitchParameter] $AsJob
+        ## Local administrator password of the VM. The username is NOT used.
+        [Parameter(ParameterSetName = 'PSCredential', ValueFromPipelineByPropertyName)] [ValidateNotNullOrEmpty()]
+        [System.Management.Automation.PSCredential]
+        [System.Management.Automation.CredentialAttribute()]
+        $Credential = (& $credentialCheckScriptBlock),
+
+        ## Local administrator password of the VM.
+        [Parameter(Mandatory, ParameterSetName = 'Password', ValueFromPipelineByPropertyName)] [ValidateNotNullOrEmpty()]
+        [System.Security.SecureString] $Password,
+        
+        ## Source configurations/mofs path 
+        [Parameter(ValueFromPipelineByPropertyName)] [ValidateNotNullOrEmpty()]
+        [System.String] $Path = (Get-Item -Path $ConfigurationData).DirectoryName,
+        
+        ## ISO volume name (defaults to destination filename)
+        [Parameter(ValueFromPipelineByPropertyName)] [ValidateNotNullOrEmpty()]
+        [System.String] $VolumeName,
+        
+        ## Temporary directory path
+        [Parameter(ValueFromPipelineByPropertyName)] [ValidateNotNullOrEmpty()]
+        [System.String] $ScratchPath
     )
-    
     begin {
-        $pathObjects = @()
+        ## If we have only a secure string, create a PSCredential
+        if ($PSCmdlet.ParameterSetName -eq 'Password') {
+            $Credential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList 'LocalAdministrator', $Password;
+        }
+        if (-not $Credential) { throw ($localized.CannotProcessCommandError -f 'Credential'); }
+        elseif ($Credential.Password.Length -eq 0) { throw ($localized.CannotBindArgumentError -f 'Password'); }
     }
-    
     process {
-        $pathObjects += $Path;
+        ## Store the configuration file path for copying later
+        $ConfigurationDataPath =  $ConfigurationData;
+        [System.Collections.Hashtable] $ConfigurationData = ConvertToConfigurationData -ConfigurationData $ConfigurationData;
+    
+        if (-not $PSBoundParameters.ContainsKey('VolumeName')) {
+            $EnvironmentName = $ConfigurationData.NonNodeData.Lability.EnvironmentName;
+            if (-not $EnvironmentName) {
+                $EnvironmentName = 'Lability';
+            }
+            $VolumeName = '{0} {1}' -f $EnvironmentName, (Get-Date).ToString('yyMM');
+        }
+        Write-Verbose ("Using volume name '{0}'." -f $VolumeName);
+        
+        if (-not $PSBoundParameters.ContainsKey('ScratchPath')) {
+            $ScratchPath = Join-Path -Path $env:Temp -ChildPath ($VolumeName.Replace(' ',''));
+        }
+        Write-Verbose ("Using scratch path '{0}'." -f $ScratchPath);
+        [ref] $null = New-Item -Path $ScratchPath -ItemType Directory -Force;
+        
+        $bootstrapPath = Join-Path -Path $ScratchPath -ChildPath 'Bootstrap.ps1';
+        [ref] $null = Copy-LabBootstrap -Credential $Credential -DestinationPath $bootstrapPath;
+        Copy-LabCertificate -ConfigurationData $configurationDataPath -DestinationPath $ScratchPath;
+        Copy-LabConfiguration -ConfigurationData $configurationDataPath -DestinationPath $ScratchPath -Path $Path;
+        Copy-LabDscResource -DestinationPath $ScratchPath;
+        
+        $filename = '{0}.iso' -f $VolumeName.Replace(' ','');
+        Write-Verbose ("Using filename '{0}'." -f $filename);
+        
+        $isoPath = Join-Path -Path $DestinationPath -ChildPath $filename;
+        Write-Verbose ("Using output path '{0}'." -f $isoPath);
+        
+        NewIsoImage -Path $ScratchPath -DestinationPath $isoPath -VolumeName $VolumeName;
+        
+        if (Test-Path -Path $ScratchPath -PathType Container) {
+            Remove-Item -Path $ScratchPath -Recurse -Force;
+        }
     }
     
-    end {
-        $startJobParams = @{
-            ScriptBlock = $writeDVDScriptBlock;
-            ArgumentList = @($pathObjects, $DestinationPath, $VolumeName, $DebugPreference, $VerbosePreference, $WarningPreference, $ErrorActionPreference);
-        }
-        $job = Start-Job @startJobParams;
-        $activity = $localized.WritingDvdProgress;
-        
-        if (-not $AsJob) {
-            while ($Job.HasMoreData -or $Job.State -eq 'Running') {     
-                $percentComplete++;
-                if ($percentComplete -gt 100) {
-                    $percentComplete = 0;
-                }
-                Write-Progress -Id $job.Id -Activity $activity -Status $DestinationPath -PercentComplete $percentComplete;
-                Receive-Job -Job $Job 
-                Start-Sleep -Milliseconds 500;
-            }
-
-            Write-Progress -Id $job.Id -Activity $activity -Completed;
-            $job | Receive-Job;
-        }
-        else {
-            return $job;
-        }
-    }
-} #end function New-LabISO
+} #end function New-LabIso

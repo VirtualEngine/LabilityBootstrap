@@ -1,19 +1,26 @@
 ### Lability ###
 <img align="right" alt="Lability logo" src="https://raw.githubusercontent.com/VirtualEngine/Lability/dev/Lability.png">
 
-The __LabilityBootstrap__ module enables deployment __Lability__ of manually configured
-computers or virtual machines using __Lability__ 
-testing environments. It uses a declarative document for machine configuration.
-However, rather than defining configurations in an external custom domain-specific
-language (DSL) document, __Lability__ extends existing PowerShell Desired
-State Configuration (DSC) configuration .psd1 documents with metadata that can
-be interpreted by the module.
+The __LabilityBootstrap__ module enables manual deployment of (virtual) machines using
+[__Lability__](https://github.com/VirtualEngine/Lability) configuration data. This makes
+it possible to use the same lab/testing configuration documents outside of the standard
+[__Lability__](https://github.com/VirtualEngine/Lability) local Hyper-V host deployment
+model; for example using VMware Workstation or Oracle VirtualBox.
+
+[__Lability__](https://github.com/VirtualEngine/Lability) automatically injects the required certificates, file (DSC and custom)
+resources and configuration files into a VM's VHD(X) file during the provisioning
+process. __LabilityBootstrap__ works by creating a self-contained .ISO file containing
+all the required resources. This resulting .ISO file can then be mounted within each
+(virtual) machine to manually bootstrap the node's deployment.
+
+_Note: it is possible to manually bootstrap virtual machine in either Amazon Web Services or
+Microsoft Azure!_
 
 ## Versions
 
 ### Unreleased
 
-* 
+* Added New-LabIso 
 
 
 

@@ -52,7 +52,7 @@ function Copy-LabBootstrap {
         }
 
         if ($PSCmdlet.ShouldProcess($DestinationPath)) {
-            $bootstrapContent | Set-Content -Path $DestinationPath -Encoding Unicode -Force -Confirm:$false;
+            $bootstrapContent | Set-Content -Path $DestinationPath -Encoding UTF8 -Force -Confirm:$false;
             return (Get-Item -Path $DestinationPath);
         }
         

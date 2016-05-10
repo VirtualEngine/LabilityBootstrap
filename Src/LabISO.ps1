@@ -77,7 +77,8 @@ function New-LabIso {
         [ref] $null = Copy-LabBootstrap -Credential $Credential -DestinationPath $bootstrapPath;
         Copy-LabCertificate -ConfigurationData $configurationDataPath -DestinationPath $ScratchPath;
         Copy-LabConfiguration -ConfigurationData $configurationDataPath -DestinationPath $ScratchPath -Path $Path;
-        Copy-LabDscResource -DestinationPath $ScratchPath -Force:$Force;
+        Copy-LabDscResource -DestinationPath $ScratchPath;
+        Copy-LabResource -ConfigurationData $configurationDataPath -DestinationPath $ScratchPath -Force:$Force;
         
         $filename = '{0}.iso' -f $VolumeName.Replace(' ','');
         Write-Verbose ("Using filename '{0}'." -f $filename);

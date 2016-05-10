@@ -109,8 +109,8 @@ Write-Host 'OK!' -ForegroundColor Green;
 
 ## Test PowerShell remoting to be able to "push" DSC configuration..
 Write-Host "Testing PSRemoting... " -ForegroundColor Cyan -NoNewline;
-if (-not (Test-WSMan -ComputerName $env:COMPUTERNAME)) {
-    Enable-PSRemoting -SkipNetworkProfileCheck -Force -ErrorAction Stop;
+if (-not (Test-WSMan -ComputerName $env:COMPUTERNAME -ErrorAction SilentlyContinue)) {
+    Enable-PSRemoting -SkipNetworkProfileCheck -Force -ErrorAction Stop | Write-Verbose;
 }
 Write-Host 'OK!' -ForegroundColor Green;
 

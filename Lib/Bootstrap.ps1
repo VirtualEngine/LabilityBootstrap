@@ -3,14 +3,21 @@
 
 [CmdletBinding(SupportsShouldProcess, ConfirmImpact = 'Medium')]
 param (
+    ## Name of the node in the PowerShell DSC configuration document (.psd1) to apply
     [Parameter()] [ValidateNotNullOrEmpty()]
     [System.String] $NodeName,
 
+    ## Override the root path, i.e. when not running from an .Iso image
+    [Parameter()] [ValidateNotNullOrEmpty()]
+    [System.String] $RootPath = $PSScriptRoot,
+    
+    ## PowerShell DSC configuration (.psd1) document
     [Parameter()] [ValidateNotNullOrEmpty()]
     [System.Collections.Hashtable]
     [Microsoft.PowerShell.DesiredStateConfiguration.ArgumentToConfigurationDataTransformationAttribute()]
-    $ConfigurationData = "$PSScriptRoot\Configurations\ConfigurationData.psd1",
-    
+    $ConfigurationData = "$RootPath\Configurations\ConfigurationData.psd1",
+        
+    ## Expected local Administrator account password
     [Parameter()] [ValidateNotNull()]
     [System.Security.SecureString] $Password = (ConvertTo-SecureString -String '##PASSWORDPLACEHOLDER##' -AsPlainText -Force)
 )
@@ -116,7 +123,7 @@ if ($maxEnvelopeSizeKb -lt 1024) {
 Write-Host 'OK!' -ForegroundColor Green;
 
 Write-Host ("Installing certificates..") -ForegroundColor Cyan;
-Get-ChildItem -Path "$PSScriptRoot\Certificates" | ForEach-Object {
+Get-ChildItem -Path "$RootPath\Certificates" | ForEach-Object {
     
     if ($PSCmdlet.ShouldProcess($_.Name, 'Install Certificate')) {
         if ($_.Extension -eq '.cer') {
@@ -130,7 +137,7 @@ Get-ChildItem -Path "$PSScriptRoot\Certificates" | ForEach-Object {
 } #end certificates
 
 Write-Host ("Copying modules..") -ForegroundColor Cyan;
-Get-ChildItem -Path "$PSScriptRoot\Modules" | ForEach-Object {
+Get-ChildItem -Path "$RootPath\Modules" | ForEach-Object {
 
     if ($PSCmdlet.ShouldProcess($_.Name, 'Install Module')) {
         Copy-Item -Path $_.FullName -Destination "$env:ProgramFiles\WindowsPowerShell\Modules" -Recurse -Force -Verbose:$false;
@@ -139,7 +146,7 @@ Get-ChildItem -Path "$PSScriptRoot\Modules" | ForEach-Object {
 } #end modules
 
 Write-Host ("Deploying resources..") -ForegroundColor Cyan;
-$resourcePath = Join-Path -Path $PSScriptRoot -ChildPath Resources;
+$resourcePath = Join-Path -Path $RootPath -ChildPath Resources;
 foreach ($resourceId in $nodeData.Resource) {
 
     $resource = $ConfigurationData.NonNodeData.Lability.Resource | Where-Object Id -eq $ResourceId;
@@ -155,7 +162,7 @@ foreach ($resourceId in $nodeData.Resource) {
 } #end resources
 
 Write-Host ("Configurating LCM..") -ForegroundColor Cyan;
-$sourceMetaMofPath = Join-Path -Path $PSScriptRoot -ChildPath "Configurations\$NodeName.meta.mof";
+$sourceMetaMofPath = Join-Path -Path $RootPath -ChildPath "Configurations\$NodeName.meta.mof";
 if ($PSCmdlet.ShouldProcess($sourceMetaMofPath, 'Configure LCM')) {
     
     $tempPath = Join-Path -Path $env:SystemRoot -ChildPath 'Temp';
@@ -166,7 +173,7 @@ if ($PSCmdlet.ShouldProcess($sourceMetaMofPath, 'Configure LCM')) {
 } #end LCM
 
 Write-Host ("Starting Configuration...") -ForegroundColor Green;
-$sourceMofPath = Join-Path -Path $PSScriptRoot -ChildPath "Configurations\$NodeName.mof";
+$sourceMofPath = Join-Path -Path $RootPath -ChildPath "Configurations\$NodeName.mof";
 if ($PSCmdlet.ShouldProcess($sourceMofPath, 'Start Configuration')) {
     
     $tempPath = Join-Path -Path $env:SystemRoot -ChildPath 'Temp';
@@ -178,9 +185,14 @@ if ($PSCmdlet.ShouldProcess($sourceMofPath, 'Start Configuration')) {
         ## http://mikefrobbins.com/2014/10/30/powershell-desired-state-configuration-error-undefined-property-configurationname/
         $mofContent = $mofContent -replace '^\sName=.*;$|^\sConfigurationName\s=.*;$';
     }
+    
+    ## Locate the first enabled NIC interface alias
+    $interfaceAlias = Get-CimInstance -ClassName Win32_NetworkAdapter -Filter 'NetConnectionStatus = "2"' | Select -First 1 -ExpandProperty NetConnectionId;
+    $mofContent = $mofContent -replace 'Ethernet', $interfaceAlias;
+    $mofContent = $mofContent -replace 'Local Area Connection', $interfaceAlias;
 
     ## Replace 'Path = "C:\\Resources\\" references with "BootstrapDrive:\\Resources" reference
-    $resourceReplacement = ('{0}\' -f (Join-Path -Path $PSScriptRoot -ChildPath 'Resources')).Replace('\','\\');
+    $resourceReplacement = ('{0}\' -f (Join-Path -Path $RootPath -ChildPath 'Resources')).Replace('\','\\');
     $mofContent = $mofContent -replace 'C:\\\\Resources\\\\', $resourceReplacement;
 
     $mofContent | Set-Content -Path $localhostMofPath -Encoding Unicode -Force -Confirm:$false;

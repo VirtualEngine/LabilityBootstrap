@@ -24,5 +24,5 @@ ConvertFrom-StringData -StringData @'
     ResourceNotFoundError             = Resource '{0}' not found.
     CannotProcessCommandError         = Cannot process command because of one or more missing mandatory parameters: {0}.
     CannotBindArgumentError           = Cannot bind argument to parameter '{0}' because it is an empty string.
-    
+    InvalidDirectoryPathError         = Invalid directory path '{0}'.
 '@

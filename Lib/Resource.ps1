@@ -79,7 +79,7 @@ function ExpandResource {
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [System.String] $ResourcePath,
 
-        # Overwrite existing files
+        ## Overwrite any existing resource files
         [Parameter(ValueFromPipelineByPropertyName)]
         [System.Management.Automation.SwitchParameter] $Force
     )

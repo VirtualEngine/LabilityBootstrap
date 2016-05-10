@@ -34,7 +34,11 @@ function New-LabIso {
         
         ## Temporary directory path
         [Parameter(ValueFromPipelineByPropertyName)] [ValidateNotNullOrEmpty()]
-        [System.String] $ScratchPath
+        [System.String] $ScratchPath,
+        
+        ## Overwrite any existing resource files, e.g. expanded Iso/Zip archives
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [System.Management.Automation.SwitchParameter] $Force
     )
     begin {
         ## If we have only a secure string, create a PSCredential
@@ -45,6 +49,11 @@ function New-LabIso {
         elseif ($Credential.Password.Length -eq 0) { throw ($localized.CannotBindArgumentError -f 'Password'); }
     }
     process {
+        ## Test destination path is an existing folder
+        if (-not (Test-Path -Path $DestinationPath -PathType Container)) {
+            throw ($localized.InvalidDirectoryPathError -f $DestinationPath);
+        }
+        
         ## Store the configuration file path for copying later
         $ConfigurationDataPath =  $ConfigurationData;
         [System.Collections.Hashtable] $ConfigurationData = ConvertToConfigurationData -ConfigurationData $ConfigurationData;
@@ -68,7 +77,7 @@ function New-LabIso {
         [ref] $null = Copy-LabBootstrap -Credential $Credential -DestinationPath $bootstrapPath;
         Copy-LabCertificate -ConfigurationData $configurationDataPath -DestinationPath $ScratchPath;
         Copy-LabConfiguration -ConfigurationData $configurationDataPath -DestinationPath $ScratchPath -Path $Path;
-        Copy-LabDscResource -DestinationPath $ScratchPath;
+        Copy-LabDscResource -DestinationPath $ScratchPath -Force:$Force;
         
         $filename = '{0}.iso' -f $VolumeName.Replace(' ','');
         Write-Verbose ("Using filename '{0}'." -f $filename);

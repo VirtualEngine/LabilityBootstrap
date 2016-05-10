@@ -15,7 +15,11 @@ function Copy-LabResource {
         
         ## Lab VM/Node name
         [Parameter(ValueFromPipeline)]
-        [System.String[]] $NodeName
+        [System.String[]] $NodeName,
+        
+        ## Overwrite any existing resource files, e.g. expanded Iso/Zip archives
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [System.Management.Automation.SwitchParameter] $Force
     )
     begin {
         [System.Collections.Hashtable] $ConfigurationData = ConvertToConfigurationData -ConfigurationData $ConfigurationData;
@@ -25,8 +29,14 @@ function Copy-LabResource {
             $NodeName = ResolveConfigurationDataNodes -ConfigurationData $ConfigurationData;
         }
         
-        $resourceIDs = @{};
         $resourcePath = Join-Path -Path $DestinationPath -ChildPath $defaults.ResourcesPath;
+        if (-not (Test-Path -Path $resourcePath)) {
+            if ($PSCmdlet.ShouldProcess($resourcePath, $localized.CreateDirectoryConfirmation)) {
+                [ref] $null = New-Item -Path $resourcePath -ItemType Directory -Force -Confirm:$false;
+            }
+        }
+        
+        $resourceIDs = @{};
         foreach ($vm in $NodeName) {
             ## Build hashtable of unique resource IDs
             $vmProperties = ResolveConfigurationDataProperties -NodeName $vm -ConfigurationData $ConfigurationData;
@@ -37,12 +47,13 @@ function Copy-LabResource {
         
         $hostDefaults = GetConfigurationData -Configuration Host;
         foreach ($resourceId in $resourceIDs.Keys) {
-            Write-Verbose ("Copying/expanding resource '{0}' to '{1}'." -f $resourceId, $resourcePath)
+            Write-Verbose ($localized.CopyingExpandingResources -f $resourceId, $resourcePath)
             $expandResourceParams = @{
                 ResourceId = $resourceId;
                 ConfigurationData = $ConfigurationData;
                 DestinationPath = $resourcePath;
                 ResourcePath = $hostDefaults.ResourcePath;
+                Force = $Force;
             }
             if ($PSCmdlet.ShouldProcess($resourceId, $localized.CopyExpandResourceConfirmation)) {
                 ExpandResource @expandResourceParams;

@@ -140,7 +140,10 @@ Write-Host ("Copying modules..") -ForegroundColor Cyan;
 Get-ChildItem -Path "$RootPath\Modules" | ForEach-Object {
 
     if ($PSCmdlet.ShouldProcess($_.Name, 'Install Module')) {
-        Copy-Item -Path $_.FullName -Destination "$env:ProgramFiles\WindowsPowerShell\Modules" -Recurse -Force -Verbose:$false;
+        Copy-Item -Path $_.FullName -Destination "$env:ProgramFiles\WindowsPowerShell\Modules" -Recurse -Force -Verbose:$false -PassThru |
+            Where-Object { $_ -is [System.IO.FileInfo] } |  ForEach-Object {
+                    Set-ItemProperty -Path $_.FullName -Name IsReadOnly -Value $false -Verbose:$false;
+                }
     }
 
 } #end modules
@@ -155,7 +158,11 @@ foreach ($resourceId in $nodeData.Resource) {
         $destinationPath = Join-Path -Path $env:SystemDrive -ChildPath $resource.DestinationPath;
         if ($PSCmdlet.ShouldProcess("$destinationPath\$resourceId", 'Copy Resource')) {
             [ref] $null = New-Item -Path $destinationPath -ItemType Directory -Force -Confirm:$false;
-            Get-ChildItem -Path $sourcePath | Copy-Item -Destination $destinationPath -Recurse -Force -Verbose:$false -Confirm:$false;
+            Get-ChildItem -Path $sourcePath |
+                Copy-Item -Destination $destinationPath -Recurse -Force -Verbose:$false -Confirm:$false -PassThru |
+                    Where-Object { $_ -is [System.IO.FileInfo] } | ForEach-Object {
+                            Set-ItemProperty -Path $_.FullName -Name IsReadOnly -Value $false -Verbose:$false;
+                        }
         }
     }
 

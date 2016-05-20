@@ -1,4 +1,4 @@
-function New-LabIso {
+function New-LabBootstrapIso {
 <#
     .SYNOPSIS
         Creates a new Lability Bootstrap ISO image.
@@ -41,14 +41,21 @@ function New-LabIso {
         [System.Management.Automation.SwitchParameter] $Force
     )
     begin {
+        
         ## If we have only a secure string, create a PSCredential
         if ($PSCmdlet.ParameterSetName -eq 'Password') {
             $Credential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList 'LocalAdministrator', $Password;
         }
-        if (-not $Credential) { throw ($localized.CannotProcessCommandError -f 'Credential'); }
-        elseif ($Credential.Password.Length -eq 0) { throw ($localized.CannotBindArgumentError -f 'Password'); }
+        if (-not $Credential) {
+            throw ($localized.CannotProcessCommandError -f 'Credential');
+        }
+        elseif ($Credential.Password.Length -eq 0) {
+            throw ($localized.CannotBindArgumentError -f 'Password');
+        }
+        
     }
     process {
+        
         ## Test destination path is an existing folder
         if (-not (Test-Path -Path $DestinationPath -PathType Container)) {
             throw ($localized.InvalidDirectoryPathError -f $DestinationPath);
@@ -88,9 +95,6 @@ function New-LabIso {
         
         NewIsoImage -Path $ScratchPath -DestinationPath $isoPath -VolumeName $VolumeName;
         
-        if (Test-Path -Path $ScratchPath -PathType Container) {
-            Remove-Item -Path $ScratchPath -Recurse -Force;
-        }
     }
     
 } #end function New-LabIso

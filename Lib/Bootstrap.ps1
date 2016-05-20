@@ -96,6 +96,24 @@ if ($nodeData.RequiredWMFVersion -or $nodeData.MinimumWMFVersion) {
 
 } #end WMF check
 
+if ($nodeData.ContainsKey('SecureBoot')) {
+    
+    Write-Host "Checking Secure Boot... " -ForegroundColor Cyan -NoNewline;
+    $windowsVersion = (Get-CimInstance -ClassName Win32_OperatingSystem | Select-Object -ExpandProperty Version) -as [System.Version];
+    if ($windowsVersion -ge (New-Object -TypeName 'System.Version' -ArgumentList 6,2)) {
+        ## Confirm-SecureBootUEFI only available on Windows 8/2012 and later
+        if ($nodeData.SecureBoot -ne (Confirm-SecureBootUEFI -ErrorAction SilentlyContinue)) {
+            $expectedSecureBootString = if ($nodeData.SecureBoot) { 'Enabled' } else { 'Disabled' };
+            throw ("Incorrect Secure Boot setting. Expected Secure Boot to be '{0}'." -f $expectedSecureBootString);
+        }
+        Write-Host 'OK!' -ForegroundColor Green;        
+    }
+    else {
+        Write-Host 'Skipped.' -ForegroundColor Yellow;
+    }
+
+} #end Secure Boot check
+
 ## Test local Administrator password..
 Write-Host "Testing local Administrator password... " -ForegroundColor Cyan -NoNewline;
 Add-Type -AssemblyName System.DirectoryServices.AccountManagement;

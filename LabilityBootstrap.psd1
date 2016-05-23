@@ -1,6 +1,6 @@
 @{
     RootModule = 'LabilityBootstrap.psm1';
-    ModuleVersion = '0.6.2';
+    ModuleVersion = '0.6.3';
     GUID = 'fbb5ce64-f09b-48e6-88d5-e668d82ca3ec';
     Author = 'Iain Brighton';
     CompanyName = 'Virtual Engine';

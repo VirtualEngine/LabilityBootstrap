@@ -125,20 +125,43 @@ if (-not ($prinipalContext.ValidateCredentials('Administrator', $unsecuredString
 }
 Write-Host 'OK!' -ForegroundColor Green;
 
+## Test network profile type (required for Set-WSManInstance)
+Write-Host "Testing Network Profile(s)... " -ForegroundColor Cyan -NoNewline;
+$networkListManager = [Activator]::CreateInstance([Type]::GetTypeFromCLSID([System.Guid]'{DCB00C01-570F-4A9B-8D69-199FDBA5723B}'));
+$networkProfileTypes = $networkListManager.GetNetworkConnections() | ForEach-Object {
+    $_.GetNetwork().GetCategory();
+}
+if ($networkProfileTypes -contains 0) {
+    ## Public profile(s)
+    $networkListManager.GetNetworkConnections() | ForEach-Object {
+        $_.GetNetwork().SetCategory(1);
+    }
+    Write-Host 'Updated' -ForegroundColor Yellow;
+}
+else {
+    Write-Host 'OK!' -ForegroundColor Green;
+}
+
 ## Test PowerShell remoting to be able to "push" DSC configuration..
 Write-Host "Testing PSRemoting... " -ForegroundColor Cyan -NoNewline;
 if (-not (Test-WSMan -ComputerName $env:COMPUTERNAME -ErrorAction SilentlyContinue)) {
     Enable-PSRemoting -SkipNetworkProfileCheck -Force -ErrorAction Stop | Write-Verbose;
+    Write-Host 'Enabled' -ForegroundColor Yellow;
 }
-Write-Host 'OK!' -ForegroundColor Green;
+else {
+    Write-Host 'OK!' -ForegroundColor Green;
+}
 
 ## Test WSMan\MaxEnvelopeSizeKb..
 Write-Host "Testing WSMan... " -ForegroundColor Cyan -NoNewline;
 $maxEnvelopeSizeKb = (Get-WSManInstance -ResourceURI winrm/config).MaxEnvelopeSizekb -as [System.Int32];
 if ($maxEnvelopeSizeKb -lt 1024) {
     [ref] $null = Set-WSManInstance -ResourceURI winrm/config -ValueSet @{ MaxEnvelopeSizekb = '1024'; }
+    Write-Host 'Updated' -ForegroundColor Yellow;
 }
-Write-Host 'OK!' -ForegroundColor Green;
+else {
+    Write-Host 'OK!' -ForegroundColor Green;
+}
 
 Write-Host ("Installing certificates..") -ForegroundColor Cyan;
 Get-ChildItem -Path "$RootPath\Certificates" | ForEach-Object {

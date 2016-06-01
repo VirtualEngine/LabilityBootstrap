@@ -70,7 +70,8 @@ function New-LabBootstrapIso {
             if (-not $EnvironmentName) {
                 $EnvironmentName = 'Lability';
             }
-            $VolumeName = '{0} {1}' -f $EnvironmentName, (Get-Date).ToString('yyMM');
+            $gitRevision = GetGitRevision -Path $Path;
+            $VolumeName = '{0} {1}.{2}' -f $EnvironmentName, (Get-Date).ToString('yyMM'), $gitRevision;
         }
         Write-Verbose ("Using volume name '{0}'." -f $VolumeName);
         

@@ -16,6 +16,9 @@ ConvertFrom-StringData -StringData @'
     CopyFileConfirmation            = Copy File
     CopyExpandResourceConfirmation  = Copy/Expand Resource
     CopyDscModulesConfirmation      = Copy DSC Resource Modules
+    
+    GitNotFoundWarning              = GIT.EXE was not found.
+    InvalidGitRepositoryWarning     = Path '{0}' is an invalid Git repository.
 
     InvalidDestinationPathError       = Invalid destination path '{0}' specified.
     ExpandNotSupportedError           = Expand operation not supported on '{0}' file type.

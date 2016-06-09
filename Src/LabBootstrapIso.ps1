@@ -71,14 +71,14 @@ function New-LabBootstrapIso {
                 $EnvironmentName = 'Lability';
             }
             $gitRevision = GetGitRevision -Path $Path;
-            $VolumeName = '{0} {1}.{2}' -f $EnvironmentName, (Get-Date).ToString('yyMM'), $gitRevision;
+            $VolumeName = '{0} {1} r{2}' -f $EnvironmentName, (Get-Date).ToString('yyMM'), $gitRevision;
         }
-        Write-Verbose ("Using volume name '{0}'." -f $VolumeName);
+        Write-Verbose -Message ($localized.UsingVolumeName -f $VolumeName);
         
         if (-not $PSBoundParameters.ContainsKey('ScratchPath')) {
             $ScratchPath = Join-Path -Path $env:Temp -ChildPath ($VolumeName.Replace(' ',''));
         }
-        Write-Verbose ("Using scratch path '{0}'." -f $ScratchPath);
+        Write-Verbose -Message ($localized.UsingScratchPath -f $ScratchPath);
         [ref] $null = New-Item -Path $ScratchPath -ItemType Directory -Force;
         
         $bootstrapPath = Join-Path -Path $ScratchPath -ChildPath 'Bootstrap.ps1';
@@ -88,11 +88,17 @@ function New-LabBootstrapIso {
         Copy-LabDscResource -DestinationPath $ScratchPath;
         Copy-LabResource -ConfigurationData $configurationDataPath -DestinationPath $ScratchPath -Force:$Force;
         
+        Get-ChildItem -Path $Path -Filter ReadMe* |
+            ForEach-Object {
+                Write-Verbose -Message ($loaclized.CopyingReadMeFile -f $_.Name);
+                Copy-Item -Path $_.FullName -Destination $ScratchPath
+            }
+        
         $filename = '{0}.iso' -f $VolumeName.Replace(' ','');
-        Write-Verbose ("Using filename '{0}'." -f $filename);
+        Write-Verbose -Message ($localized.UsingFilename -f $filename);
         
         $isoPath = Join-Path -Path $DestinationPath -ChildPath $filename;
-        Write-Verbose ("Using output path '{0}'." -f $isoPath);
+        Write-Verbose -Message ($localized.UsingOutputPath -f $isoPath);
         
         NewIsoImage -Path $ScratchPath -DestinationPath $isoPath -VolumeName $VolumeName;
         

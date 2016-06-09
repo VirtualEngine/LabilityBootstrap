@@ -10,6 +10,7 @@ ConvertFrom-StringData -StringData @'
     CopyingCertificate              = Copying certificate '{0}' to '{1}'.
     CopyingConfigurationDataFile    = Copying configuration data file '{0}'.
     CopyingConfigurationFile        = Copying configuration '{0}' to '{1}'.
+    CopyingReadMeFile               = Copying readme '{0}' file.
     CopyingDscResourceModules       = Copying DSC resource modules to '{0}'.
     WritingDvdProgress              = Writing DVD
     CreateDirectoryConfirmation     = Create Directory

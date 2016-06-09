@@ -114,18 +114,18 @@ $writeDVDScriptBlock = {
         }
         
         if ($pathItem -is [System.IO.FileInfo]) {
-            Write-Verbose ("Adding file '{0}'." -f $pathItem.FullName);
+            Write-Verbose -Message ("Adding file '{0}'." -f $pathItem.FullName);
             $fsi.Root.AddTree($pathItem.FullName, $true);
         }
         elseif ($pathItem -is [System.IO.DirectoryInfo]) {
             Get-ChildItem -Path $pathItem.FullName | ForEach-Object {
-                Write-Verbose ("Adding directory '{0}." -f $PSItem.FullName);
+                Write-Verbose -Message ("Adding directory '{0}." -f $PSItem.FullName);
                 $fsi.Root.AddTree($PSItem.FullName, $true);
             }
         }
     } #end foreach item
     
-    Write-Verbose ("Writing ISO '{0}'." -f $DestinationPath);
+    Write-Verbose -Message ("Writing ISO '{0}'." -f $DestinationPath);
     WriteIStreamToFile -IStream $fsi.CreateResultImage().ImageStream -DestinationPath $DestinationPath;
     return Get-Item -Path $DestinationPath;
 

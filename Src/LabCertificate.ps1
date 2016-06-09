@@ -45,7 +45,7 @@ function Copy-LabCertificate {
         foreach ($certificate in $Certificates.Values) {
             $certificateDestinationPath = Join-Path -Path $certificatePath -ChildPath $certificate.Name;
             if ($PSCmdlet.ShouldProcess($certificateDestinationPath, $localized.CopyFileConfirmation)) {
-                Write-Verbose ($localized.CopyingCertificate -f $certificate.Name, $certificatePath);
+                Write-Verbose -Message ($localized.CopyingCertificate -f $certificate.Name, $certificatePath);
                 $certificate | Copy-Item -Destination $certificatePath -Confirm:$false;
             }
         }

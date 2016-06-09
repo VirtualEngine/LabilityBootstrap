@@ -17,7 +17,7 @@ function Copy-LabDscResource {
         }
         
         $modulesPath = Join-Path -Path $DestinationPath -ChildPath $defaults.ModulesPath;
-        Write-Verbose ($localized.CopyingDscResourceModules -f $modulesPath);
+        Write-Verbose -Message ($localized.CopyingDscResourceModules -f $modulesPath);
         if ($PSCmdlet.ShouldProcess($modulesPath, $localized.CopyDscModulesConfirmation)) {
              & $lability $scriptBlock -DestinationPath $modulesPath;
         }

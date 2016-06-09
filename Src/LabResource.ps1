@@ -47,7 +47,7 @@ function Copy-LabResource {
         
         $hostDefaults = GetConfigurationData -Configuration Host;
         foreach ($resourceId in $resourceIDs.Keys) {
-            Write-Verbose ($localized.CopyingExpandingResources -f $resourceId, $resourcePath)
+            Write-Verbose -Message ($localized.CopyingExpandingResources -f $resourceId, $resourcePath)
             $expandResourceParams = @{
                 ResourceId = $resourceId;
                 ConfigurationData = $ConfigurationData;

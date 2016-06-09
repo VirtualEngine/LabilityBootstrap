@@ -17,6 +17,10 @@ ConvertFrom-StringData -StringData @'
     CopyFileConfirmation            = Copy File
     CopyExpandResourceConfirmation  = Copy/Expand Resource
     CopyDscModulesConfirmation      = Copy DSC Resource Modules
+    UsingVolumeName                 = Using volume name '{0}'.
+    UsingScratchPath                = Using scratch path '{0}'.
+    UsingFilename                   = Using filename '{0}'.
+    UsingOutputPath                 = Using output path '{0}'.
     
     GitNotFoundWarning              = GIT.EXE was not found.
     InvalidGitRepositoryWarning     = Path '{0}' is an invalid Git repository.

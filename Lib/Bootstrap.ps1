@@ -10,13 +10,13 @@ param (
     ## Override the root path, i.e. when not running from an .Iso image
     [Parameter()] [ValidateNotNullOrEmpty()]
     [System.String] $RootPath = $PSScriptRoot,
-    
+
     ## PowerShell DSC configuration (.psd1) document
     [Parameter()] [ValidateNotNullOrEmpty()]
     [System.Collections.Hashtable]
     [Microsoft.PowerShell.DesiredStateConfiguration.ArgumentToConfigurationDataTransformationAttribute()]
     $ConfigurationData = "$RootPath\Configurations\ConfigurationData.psd1",
-        
+
     ## Expected local Administrator account password
     [Parameter()] [ValidateNotNull()]
     [System.Security.SecureString] $Password = (ConvertTo-SecureString -String '##PASSWORDPLACEHOLDER##' -AsPlainText -Force)
@@ -82,7 +82,7 @@ Write-Host ("Successfully located node '{0}'." -f $NodeName) -ForegroundColor Gr
 
 $nodeData = ResolveConfigurationDataProperties -NodeName $NodeName -ConfigurationData $ConfigurationData;
 if ($nodeData.RequiredWMFVersion -or $nodeData.MinimumWMFVersion) {
-    
+
     Write-Host "Checking Windows Management Framework version... " -ForegroundColor Cyan -NoNewline;
     if ($nodeData.RequiredWMFVersion -and ($PSVersionTable.PSVersion.Major -ne $nodeData.RequiredWMFVersion)) {
         Write-Host 'Failed :(' -ForegroundColor Red;
@@ -97,16 +97,23 @@ if ($nodeData.RequiredWMFVersion -or $nodeData.MinimumWMFVersion) {
 } #end WMF check
 
 if ($nodeData.ContainsKey('SecureBoot')) {
-    
+
     Write-Host "Checking Secure Boot... " -ForegroundColor Cyan -NoNewline;
     $windowsVersion = (Get-CimInstance -ClassName Win32_OperatingSystem | Select-Object -ExpandProperty Version) -as [System.Version];
+    ## Confirm-SecureBootUEFI only available on Windows 8/2012 and later
     if ($windowsVersion -ge (New-Object -TypeName 'System.Version' -ArgumentList 6,2)) {
-        ## Confirm-SecureBootUEFI only available on Windows 8/2012 and later
-        if ($nodeData.SecureBoot -ne (Confirm-SecureBootUEFI -ErrorAction SilentlyContinue)) {
-            $expectedSecureBootString = if ($nodeData.SecureBoot) { 'Enabled' } else { 'Disabled' };
-            throw ("Incorrect Secure Boot setting. Expected Secure Boot to be '{0}'." -f $expectedSecureBootString);
+        try {
+            if ($nodeData.SecureBoot -ne (Confirm-SecureBootUEFI -ErrorAction SilentlyContinue)) {
+                $expectedSecureBootString = if ($nodeData.SecureBoot) { 'Enabled' } else { 'Disabled' };
+                throw ("Incorrect Secure Boot setting. Expected Secure Boot to be '{0}'." -f $expectedSecureBootString);
+            }
+            else {
+                Write-Host 'OK!' -ForegroundColor Green;
+            }
         }
-        Write-Host 'OK!' -ForegroundColor Green;        
+        catch [System.NotSupportedException] {
+            ## Swallow the exception as it's probably a Generation 1 VM
+        }
     }
     else {
         Write-Host 'Skipped.' -ForegroundColor Yellow;
@@ -165,7 +172,7 @@ else {
 
 Write-Host ("Installing certificates..") -ForegroundColor Cyan;
 Get-ChildItem -Path "$RootPath\Certificates" | ForEach-Object {
-    
+
     if ($PSCmdlet.ShouldProcess($_.Name, 'Install Certificate')) {
         if ($_.Extension -eq '.cer') {
             certutil.exe -addstore -f "Root" $_.FullName | Write-Verbose;
@@ -212,9 +219,9 @@ foreach ($resourceId in $nodeData.Resource) {
 Write-Host ("Configurating LCM..") -ForegroundColor Cyan;
 $sourceMetaMofPath = Join-Path -Path $RootPath -ChildPath "Configurations\$NodeName.meta.mof";
 if ($PSCmdlet.ShouldProcess($sourceMetaMofPath, 'Configure LCM')) {
-    
+
     $tempPath = Join-Path -Path $env:SystemRoot -ChildPath 'Temp';
-    $localhostMetaMofPath = Join-Path -Path $tempPath -ChildPath 'localhost.meta.mof';    
+    $localhostMetaMofPath = Join-Path -Path $tempPath -ChildPath 'localhost.meta.mof';
     Copy-Item -Path $sourceMetaMofPath -Destination $localhostMetaMofPath -Confirm:$false -Verbose:$false -Force;
     Set-DscLocalConfigurationManager -Path $tempPath -ErrorAction Stop;
 
@@ -223,17 +230,17 @@ if ($PSCmdlet.ShouldProcess($sourceMetaMofPath, 'Configure LCM')) {
 Write-Host ("Starting Configuration...") -ForegroundColor Green;
 $sourceMofPath = Join-Path -Path $RootPath -ChildPath "Configurations\$NodeName.mof";
 if ($PSCmdlet.ShouldProcess($sourceMofPath, 'Start Configuration')) {
-    
+
     $tempPath = Join-Path -Path $env:SystemRoot -ChildPath 'Temp';
     $localhostMofPath = Join-Path -Path $tempPath -ChildPath 'localhost.mof';
-    
+
     $mofContent = Get-Content -Path $sourceMofPath;
     if ($PSVersionTable.PSVersion.Major -eq 4) {
         ## Convert the .mof to v4 compatible - credit to Mike Robbins
         ## http://mikefrobbins.com/2014/10/30/powershell-desired-state-configuration-error-undefined-property-configurationname/
         $mofContent = $mofContent -replace '^\sName=.*;$|^\sConfigurationName\s=.*;$';
     }
-    
+
     ## Locate the first enabled NIC interface alias
     $interfaceAlias = Get-CimInstance -ClassName Win32_NetworkAdapter -Filter 'NetConnectionStatus = "2"' | Select -First 1 -ExpandProperty NetConnectionId;
     $mofContent = $mofContent -replace 'Ethernet', $interfaceAlias;

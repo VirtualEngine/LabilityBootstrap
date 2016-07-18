@@ -1,29 +1,31 @@
 ConvertFrom-StringData -StringData @'
-    EnterLocalAdministratorPassword = Enter the virtual machines' local administrator password.
-    ExpandingIsoResource            = Expanding ISO resource '{0}'.
-    SkippingIsoResource             = Skipping ISO resource '{0}'.
-    ExpandingZipArchive             = Expanding Zip archive '{0}'.
-    SkippingZipArchive              = Skipping Zip archive '{0}'.
-    CopyingFileResource             = Copying file resource '{0}'.
-    SkippingFileResource            = Skipping file resource '{0}'.
-    CopyingExpandingResources       = Copying/expanding resource '{0}' to '{1}'.
-    CopyingCertificate              = Copying certificate '{0}' to '{1}'.
-    CopyingConfigurationDataFile    = Copying configuration data file '{0}'.
-    CopyingConfigurationFile        = Copying configuration '{0}' to '{1}'.
-    CopyingReadMeFile               = Copying readme '{0}' file.
-    CopyingDscResourceModules       = Copying DSC resource modules to '{0}'.
-    WritingDvdProgress              = Writing DVD
-    CreateDirectoryConfirmation     = Create Directory
-    CopyFileConfirmation            = Copy File
-    CopyExpandResourceConfirmation  = Copy/Expand Resource
-    CopyDscModulesConfirmation      = Copy DSC Resource Modules
-    UsingVolumeName                 = Using volume name '{0}'.
-    UsingScratchPath                = Using scratch path '{0}'.
-    UsingFilename                   = Using filename '{0}'.
-    UsingOutputPath                 = Using output path '{0}'.
-    
-    GitNotFoundWarning              = GIT.EXE was not found.
-    InvalidGitRepositoryWarning     = Path '{0}' is an invalid Git repository.
+    EnterLocalAdministratorPassword   = Enter the virtual machines' local administrator password.
+    ExpandingIsoResource              = Expanding ISO resource '{0}'.
+    SkippingIsoResource               = Skipping ISO resource '{0}'.
+    ExpandingZipArchive               = Expanding Zip archive '{0}'.
+    SkippingZipArchive                = Skipping Zip archive '{0}'.
+    CopyingFileResource               = Copying file resource '{0}'.
+    SkippingFileResource              = Skipping file resource '{0}'.
+    CopyingExpandingResources         = Copying/expanding resource '{0}' to '{1}'.
+    CopyingCertificate                = Copying certificate '{0}' to '{1}'.
+    CopyingConfigurationDataFile      = Copying configuration data file '{0}'.
+    CopyingConfigurationFile          = Copying configuration '{0}' to '{1}'.
+    CopyingReadMeFile                 = Copying readme '{0}' file.
+    CopyingDscResourceModules         = Copying DSC resource modules to '{0}'.
+    CopyingPowerShellModules          = Copying PowerShell modules to '{0}'.
+    WritingDvdProgress                = Writing DVD
+    CreateDirectoryConfirmation       = Create Directory
+    CopyFileConfirmation              = Copy File
+    CopyExpandResourceConfirmation    = Copy/Expand Resource
+    CopyDscModulesConfirmation        = Copy DSC Resource Modules
+    CopyPowerShellModulesConfirmation = Copy PowerShell Modules
+    UsingVolumeName                   = Using volume name '{0}'.
+    UsingScratchPath                  = Using scratch path '{0}'.
+    UsingFilename                     = Using filename '{0}'.
+    UsingOutputPath                   = Using output path '{0}'.
+
+    GitNotFoundWarning                = GIT.EXE was not found.
+    InvalidGitRepositoryWarning       = Path '{0}' is an invalid Git repository.
 
     InvalidDestinationPathError       = Invalid destination path '{0}' specified.
     ExpandNotSupportedError           = Expand operation not supported on '{0}' file type.

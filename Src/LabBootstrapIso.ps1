@@ -85,7 +85,8 @@ function New-LabBootstrapIso {
         [ref] $null = Copy-LabBootstrap -Credential $Credential -DestinationPath $bootstrapPath;
         Copy-LabCertificate -ConfigurationData $configurationDataPath -DestinationPath $ScratchPath;
         Copy-LabConfiguration -ConfigurationData $configurationDataPath -DestinationPath $ScratchPath -Path $Path;
-        Copy-LabDscResource -DestinationPath $ScratchPath;
+        Copy-LabDscResource -ConfigurationData $configurationDataPath -DestinationPath $ScratchPath;
+        Copy-LabModule -ConfigurationData $configurationDataPath -DestinationPath $ScratchPath;
         Copy-LabResource -ConfigurationData $configurationDataPath -DestinationPath $ScratchPath -Force:$Force;
 
         Get-ChildItem -Path $Path -Filter ReadMe* |

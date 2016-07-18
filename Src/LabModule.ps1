@@ -1,7 +1,7 @@
-function Copy-LabDscResource {
+function Copy-LabModule {
 <#
     .SYNOPSIS
-        Copies the Lability PowerShell DSC resource modules.
+        Copies the Lability PowerShell modules.
 #>
     [CmdletBinding(SupportsShouldProcess)]
     param (
@@ -26,16 +26,16 @@ function Copy-LabDscResource {
             ExpandModuleCache -Module $Module -DestinationPath $DestinationPath;
         }
 
-        if ($null -ne $ConfigurationData.NonNodeData.Lability.DSCResource) {
+        if ($null -ne $ConfigurationData.NonNodeData.Lability.Module) {
 
             $modulesPath = Join-Path -Path $DestinationPath -ChildPath $defaults.ModulesPath;
-            Write-Verbose -Message ($localized.CopyingDscResourceModules -f $modulesPath);
+            Write-Verbose -Message ($localized.CopyingPowerShellModules -f $modulesPath);
 
-            if ($PSCmdlet.ShouldProcess($modulesPath, $localized.CopyDscModulesConfirmation)) {
-                & $lability $scriptBlock -Module $ConfigurationData.NonNodeData.Lability.DSCResource -DestinationPath $modulesPath;
+            if ($PSCmdlet.ShouldProcess($modulesPath, $localized.CopyPowerShellModulesConfirmation)) {
+                & $lability $scriptBlock -Module $ConfigurationData.NonNodeData.Lability.Module -DestinationPath $modulesPath;
             }
 
         }
 
     } #end process
-} #end function Copy-LabDscResource
+} #end function Copy-LabModule

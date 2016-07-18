@@ -57,15 +57,21 @@ function Install-LabModule {
 
         [Parameter(ValueFromPipelineByPropertyName, ParameterSetName = 'Scope')]
         [ValidateSet('AllUsers','CurrentUser')]
-        [System.String] $Scope,
+        [System.String] $Scope = 'CurrentUser',
 
         [Parameter(Mandatory, ValueFromPipelineByPropertyName, ParameterSetName = 'Path')]
         [ValidateNotNullOrEmpty()]
         [System.String] $DestinationPath
     )
+    begin {
+
+        [System.Collections.Hashtable] $ConfigurationData = ConvertToConfigurationData -ConfigurationData $ConfigurationData;
+
+    }
     process {
 
         if ($PSCmdlet.ParameterSetName -eq 'Scope') {
+
             if ($Scope -eq 'AllUsers') {
                 $DestinationPath = Join-Path -Path $env:ProgramFiles -ChildPath 'WindowsPowerShell\Modules';
             }
@@ -76,7 +82,7 @@ function Install-LabModule {
         }
 
         ## Install PowerShell modules
-        if ($PSBoundParamaters.ContainsKey('NodeName')) {
+        if ($PSBoundParameters.ContainsKey('NodeName')) {
             $resolveLabModuleParams = @{
                 NodeName = $NodeName;
                 ConfigurationData = $ConfigurationData;
@@ -88,14 +94,14 @@ function Install-LabModule {
             $powerShellModules = $ConfigurationData.NonNodeData.Lability.Module;
         }
 
-        if ($null -ne $modulepowerShellModules) {
-            if ($PSCmdlet.ShouldProcess($null, $null) {
-                ExpandLabModule -Module $modulepowerShellModules -DestinationPath $DestinationPath;
+        if ($null -ne $powerShellModules) {
+            if ($PSCmdlet.ShouldProcess($DestinationPath, $localized.InstallModulesConfirmation)) {
+                ExpandModuleCache -Module $powerShellModules -DestinationPath $DestinationPath;
             }
         }
 
         ## Install DSC resource modules
-        if ($PSBoundParamaters.ContainsKey('NodeName')) {
+        if ($PSBoundParameters.ContainsKey('NodeName')) {
             $resolveLabModuleParams = @{
                 NodeName = $NodeName;
                 ConfigurationData = $ConfigurationData;
@@ -108,8 +114,8 @@ function Install-LabModule {
         }
 
         if ($null -ne $dscResourceModules) {
-            if ($PSCmdlet.ShouldProcess($null, $null) {
-                ExpandLabModule -Module $dscResourceModules -DestinationPath $DestinationPath;
+            if ($PSCmdlet.ShouldProcess($DestinationPath, $localized.InstallDscResourcesConfirmation)) {
+                ExpandModuleCache -Module $dscResourceModules -DestinationPath $DestinationPath;
             }
         }
 

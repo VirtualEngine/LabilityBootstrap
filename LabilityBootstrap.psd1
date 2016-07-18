@@ -8,7 +8,8 @@
     Description = 'The LabilityBootstrap module contains cmdlets for manually bootstrapping Lability configurations on (virtual) machines.';
     PowerShellVersion = '4.0';
     RequiredModules = @('Lability');
-    FunctionsToExport = @('Copy-LabBootstrap','Copy-LabCertificate','Copy-LabConfiguration','Copy-LabDscResource','New-LabBootstrapIso','Copy-LabResource');
+    FunctionsToExport = @('Copy-LabBootstrap','Copy-LabCertificate','Copy-LabConfiguration','Copy-LabDscResource',
+                            'New-LabBootstrapIso','Copy-LabResource','Install-LabModule');
     PrivateData = @{
         PSData = @{  # Private data to pass to the module specified in RootModule/ModuleToProcess
             Tags = @('VirtualEngine','Lability','Bootstrap','Powershell','Development','HyperV','Hyper-V','Test','Lab','TestLab');

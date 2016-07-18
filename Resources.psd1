@@ -19,6 +19,8 @@ ConvertFrom-StringData -StringData @'
     CopyExpandResourceConfirmation    = Copy/Expand Resource
     CopyDscModulesConfirmation        = Copy DSC Resource Modules
     CopyPowerShellModulesConfirmation = Copy PowerShell Modules
+    InstallDscResourcesConfirmation   = Install DSC Resource Modules
+    InstallModulesConfirmation        = Install PowerShell Modules
     UsingVolumeName                   = Using volume name '{0}'.
     UsingScratchPath                  = Using scratch path '{0}'.
     UsingFilename                     = Using filename '{0}'.

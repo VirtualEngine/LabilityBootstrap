@@ -1,4 +1,4 @@
-﻿function ExpandZipArchive {
+﻿function Expand-ZipArchive {
 <#
     .SYNOPSIS
         Extracts a GitHub Zip archive.
@@ -37,8 +37,8 @@
                 [System.Management.Automation.SwitchParameter] $ExcludeNuSpecFiles,
                 [System.Management.Automation.SwitchParameter] $Force
             )
-            ExpandZipArchive -Path $Path -DestinationPath $DestinationPath -ExcludeNuSpecFiles:$ExcludeNuSpecFiles -Force:$Force;
+            Expand-ZipArchive -Path $Path -DestinationPath $DestinationPath -ExcludeNuSpecFiles:$ExcludeNuSpecFiles -Force:$Force;
         }
         & $lability $scriptBlock  -Path $Path -DestinationPath $DestinationPath -ExcludeNuSpecFiles:$ExcludeNuSpecFiles -Force:$Force;
     }
-} #end function ExpandZipArchive
+} #end function Expand-ZipArchive

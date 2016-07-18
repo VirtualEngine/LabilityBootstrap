@@ -47,7 +47,7 @@ Write-Host ("Successfully located node '{0}'." -f $NodeName) -ForegroundColor Gr
         return $unsecuredString;
     }
 
-    function ResolveConfigurationDataProperties {
+    function Resolve-ConfigurationDataProperty {
         [CmdletBinding()]
         [OutputType([System.Collections.Hashtable])]
         param (
@@ -76,11 +76,11 @@ Write-Host ("Successfully located node '{0}'." -f $NodeName) -ForegroundColor Gr
 
             return $node;
         } #end process
-    } #end function ResolveConfigurationDataProperties
+    } #end function Resolve-ConfigurationDataProperty
 
 #endregion private functions
 
-$nodeData = ResolveConfigurationDataProperties -NodeName $NodeName -ConfigurationData $ConfigurationData;
+$nodeData = Resolve-ConfigurationDataProperty -NodeName $NodeName -ConfigurationData $ConfigurationData;
 if ($nodeData.RequiredWMFVersion -or $nodeData.MinimumWMFVersion) {
 
     Write-Host "Checking Windows Management Framework version... " -ForegroundColor Cyan -NoNewline;

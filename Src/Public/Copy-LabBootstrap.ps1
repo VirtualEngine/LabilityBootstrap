@@ -1,19 +1,3 @@
-function ConvertToString {
-<#
-    .SYNOPSIS
-        Converts a secure string to an unsecured string.
-#>
-    [CmdletBinding()]
-    param (
-        [Parameter(Mandatory)] [ValidateNotNull()]
-        [System.Security.SecureString] $Password
-    )
-    $ptr = [System.Runtime.InteropServices.Marshal]::SecureStringToCoTaskMemUnicode($Password);
-    $unsecuredString = [System.Runtime.InteropServices.Marshal]::PtrToStringUni($ptr);
-    [System.Runtime.InteropServices.Marshal]::ZeroFreeCoTaskMemUnicode($ptr);
-    return $unsecuredString;
-}
-
 function Copy-LabBootstrap {
 <#
     .SYNOPSIS
@@ -46,7 +30,7 @@ function Copy-LabBootstrap {
     process {
 
         $bootstrapPath = Join-Path -Path $defaults.ModuleRoot -ChildPath 'Lib\Bootstrap.ps1';
-        $unsecuredPassword = ConvertToString -Password $Credential.Password;
+        $unsecuredPassword = ConvertTo-InsecureString -Password $Credential.Password;
         $bootstrapContent = Get-Content -Path $bootstrapPath | ForEach-Object {
             $_ -replace '##PASSWORDPLACEHOLDER##', $unsecuredPassword;
         }
@@ -55,6 +39,6 @@ function Copy-LabBootstrap {
             $bootstrapContent | Set-Content -Path $DestinationPath -Encoding UTF8 -Force -Confirm:$false;
             return (Get-Item -Path $DestinationPath);
         }
-        
+
     } #end process
 } #end function Copy-LabBootstrap

@@ -16,7 +16,7 @@ ConvertFrom-StringData -StringData @'
     WritingDvdProgress                = Writing DVD
     CreateDirectoryConfirmation       = Create Directory
     CopyFileConfirmation              = Copy File
-    CopyExpandResourceConfirmation    = Copy/Expand Resource
+    CopyExpandLabResourceConfirmation = Copy/Expand Resource
     CopyDscModulesConfirmation        = Copy DSC Resource Modules
     CopyPowerShellModulesConfirmation = Copy PowerShell Modules
     InstallDscResourcesConfirmation   = Install DSC Resource Modules

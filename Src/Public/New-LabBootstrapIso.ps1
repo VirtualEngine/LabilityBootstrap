@@ -63,14 +63,14 @@ function New-LabBootstrapIso {
 
         ## Store the configuration file path for copying later
         $ConfigurationDataPath =  $ConfigurationData;
-        [System.Collections.Hashtable] $ConfigurationData = ConvertToConfigurationData -ConfigurationData $ConfigurationData;
+        [System.Collections.Hashtable] $ConfigurationData = ConvertTo-ConfigurationData -ConfigurationData $ConfigurationData;
 
         if (-not $PSBoundParameters.ContainsKey('VolumeName')) {
             $EnvironmentName = $ConfigurationData.NonNodeData.Lability.EnvironmentName;
             if (-not $EnvironmentName) {
                 $EnvironmentName = 'Lability';
             }
-            $gitRevision = GetGitRevision -Path $Path;
+            $gitRevision = Get-GitRevision -Path $Path;
             $VolumeName = '{0} {1}.{2}' -f $EnvironmentName, (Get-Date).ToString('yyMM'), $gitRevision;
         }
         Write-Verbose -Message ($localized.UsingVolumeName -f $VolumeName);
@@ -83,10 +83,14 @@ function New-LabBootstrapIso {
 
         $bootstrapPath = Join-Path -Path $ScratchPath -ChildPath 'Bootstrap.ps1';
         [ref] $null = Copy-LabBootstrap -Credential $Credential -DestinationPath $bootstrapPath;
+
         Copy-LabCertificate -ConfigurationData $configurationDataPath -DestinationPath $ScratchPath;
+
         Copy-LabConfiguration -ConfigurationData $configurationDataPath -DestinationPath $ScratchPath -Path $Path;
-        Copy-LabDscResource -ConfigurationData $configurationDataPath -DestinationPath $ScratchPath;
-        Copy-LabModule -ConfigurationData $configurationDataPath -DestinationPath $ScratchPath;
+
+        $modulesPath = Join-Path -Path $ScratchPath -ChildPath $defaults.ModulesPath;
+        Copy-LabModule -ConfigurationData $configurationDataPath -DestinationPath $ScratchPath -ModuleType 'Module','DscResource';
+
         Copy-LabResource -ConfigurationData $configurationDataPath -DestinationPath $ScratchPath -Force:$Force;
 
         Get-ChildItem -Path $Path -Filter ReadMe* |
@@ -101,7 +105,7 @@ function New-LabBootstrapIso {
         $isoPath = Join-Path -Path $DestinationPath -ChildPath $filename;
         Write-Verbose -Message ($localized.UsingOutputPath -f $isoPath);
 
-        NewIsoImage -Path $ScratchPath -DestinationPath $isoPath -VolumeName $VolumeName;
+        New-IsoImage -Path $ScratchPath -DestinationPath $isoPath -VolumeName $VolumeName;
 
     }
 

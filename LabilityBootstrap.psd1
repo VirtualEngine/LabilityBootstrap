@@ -1,6 +1,6 @@
 @{
     RootModule = 'LabilityBootstrap.psm1';
-    ModuleVersion = '0.9.0';
+    ModuleVersion = '0.9.1';
     GUID = 'fbb5ce64-f09b-48e6-88d5-e668d82ca3ec';
     Author = 'Iain Brighton';
     CompanyName = 'Virtual Engine';
@@ -9,7 +9,7 @@
     PowerShellVersion = '4.0';
     RequiredModules = @('Lability');
     FunctionsToExport = @('Copy-LabBootstrap','Copy-LabCertificate','Copy-LabConfiguration','Copy-LabDscResource',
-                            'New-LabBootstrapIso','Copy-LabResource','Install-LabModule');
+                            'New-LabBootstrapIso','Copy-LabResource','Copy-LabModule','Install-LabModule');
     PrivateData = @{
         PSData = @{  # Private data to pass to the module specified in RootModule/ModuleToProcess
             Tags = @('VirtualEngine','Lability','Bootstrap','Powershell','Development','HyperV','Hyper-V','Test','Lab','TestLab');

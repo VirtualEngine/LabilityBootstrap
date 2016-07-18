@@ -8,15 +8,15 @@ function Copy-LabConfiguration {
         ## Specifies a PowerShell DSC configuration document (.psd1) containing the lab configuration.
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [System.String] $ConfigurationData,
-        
-        ## Lability bootstrap path 
+
+        ## Lability bootstrap path
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [System.String] $DestinationPath,
-        
-        ## Source configurations path 
+
+        ## Source configurations path
         [Parameter(ValueFromPipelineByPropertyName)] [ValidateNotNullOrEmpty()]
         [System.String] $Path = (Get-Item -Path $ConfigurationData).DirectoryName,
-        
+
         ## Lab VM/Node name
         [Parameter(ValueFromPipeline)]
         [System.String[]] $NodeName
@@ -29,7 +29,7 @@ function Copy-LabConfiguration {
                 [ref] $null = New-Item -Path $configurationPath -ItemType Directory -Force -Confirm:$false;
             }
         }
-        
+
         ## Copy the actual configuration data before we start
         $configurationDataPath = Join-Path -Path $configurationPath -ChildPath 'ConfigurationData.psd1';
         Write-Verbose -Message ($localized.CopyingConfigurationDataFile -f $configurationDataPath);
@@ -37,10 +37,10 @@ function Copy-LabConfiguration {
             Copy-Item -Path $ConfigurationData -Destination $configurationDataPath -Force -Confirm:$false;
         }
 
-        [System.Collections.Hashtable] $ConfigurationData = ConvertToConfigurationData -ConfigurationData $ConfigurationData;
+        [System.Collections.Hashtable] $ConfigurationData = ConvertTo-ConfigurationData -ConfigurationData $ConfigurationData;
 
         if (-not $PSBoundParameters.ContainsKey('NodeName')) {
-            $NodeName = ResolveConfigurationDataNodes -ConfigurationData $ConfigurationData;
+            $NodeName = Resolve-ConfigurationDataNode -ConfigurationData $ConfigurationData;
         }
 
         foreach ($vm in $NodeName) {
@@ -50,7 +50,7 @@ function Copy-LabConfiguration {
                 if ($PSCmdlet.ShouldProcess($configurationDestinationPath, $localized.CopyFileConfirmation)) {
                     $_ | Copy-Item -Destination $configurationPath -Force -Verbose:$false -Confirm:$false;
                 }
-                
+
             }
         }
 

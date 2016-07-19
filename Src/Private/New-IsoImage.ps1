@@ -11,22 +11,28 @@ $writeDVDScriptBlock = {
         [Parameter(Mandatory)]
         [System.Object[]] $Path,
 
-        [Parameter()] [ValidateNotNullOrEmpty()]
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String] $DestinationPath = "$(Get-Location -PSProvider FileSystem)\$((Get-Date).ToString('yyyyMMdd')).iso",
 
-        [Parameter()] [ValidateNotNullOrEmpty()]
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String] $VolumeName = 'New-ISO',
 
-        [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [System.String] $DebugPreference,
 
-        [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [System.String] $VerbosePreference,
 
-        [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [System.String] $WarningPreference,
 
-        [Parameter(Mandatory)] [ValidateNotNullOrEmpty()]
+        [Parameter(Mandatory)]
+        [ValidateNotNullOrEmpty()]
         [System.String] $ErrorActionPreference
     )
 
@@ -40,6 +46,7 @@ $writeDVDScriptBlock = {
             [System.String] $DestinationPath
         )
         process {
+
             # NOTE: We cannot use [System.Runtime.InteropServices.ComTypes.IStream],
             # since PowerShell apparently cannot convert an IStream COM object to this
             # Powershell type.  (See http://stackoverflow.com/a/9037299/223837 for
@@ -109,6 +116,7 @@ $writeDVDScriptBlock = {
     $fsi.ChooseImageDefaultsForMediaType(12);
 
     foreach ($pathItem in $Path) {
+
         if ($pathItem -is [System.String]) {
             $pathItem = Get-Item -Path $pathItem;
         }
@@ -123,6 +131,7 @@ $writeDVDScriptBlock = {
                 $fsi.Root.AddTree($PSItem.FullName, $true);
             }
         }
+
     } #end foreach item
 
     Write-Verbose -Message ("Writing ISO '{0}'." -f $DestinationPath);
@@ -146,23 +155,26 @@ function New-IsoImage {
         [Parameter(ValueFromPipelineByPropertyName)]
         [System.String] $DestinationPath = "$(Get-Location -PSProvider FileSystem)\$((Get-Date).ToString('yyyyMMdd')).iso",
 
-        [Parameter()] [ValidateNotNullOrEmpty()]
+        [Parameter()]
+        [ValidateNotNullOrEmpty()]
         [System.String] $VolumeName = 'New-ISO',
 
         [Parameter()]
         [System.Management.Automation.SwitchParameter] $AsJob
     )
-
     begin {
+
         $pathObjects = @()
     }
-
     process {
-        $pathObjects += $Path;
-    }
 
+        $pathObjects += $Path;
+
+    }
     end {
+
         if ($PSCmdlet.ShouldProcess($DestinationPath, 'New-LabIso')) {
+
             $startJobParams = @{
                 ScriptBlock = $writeDVDScriptBlock;
                 ArgumentList = @($pathObjects, $DestinationPath, $VolumeName, $DebugPreference, $VerbosePreference, $WarningPreference, $ErrorActionPreference);
@@ -187,6 +199,8 @@ function New-IsoImage {
             else {
                 return $job;
             }
+
         } #end if should process
+
     } #end end
 } #end function New-IsoImage

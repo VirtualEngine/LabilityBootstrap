@@ -21,6 +21,7 @@ function Resolve-ConfigurationDataProperty {
         [System.Management.Automation.SwitchParameter] $NoEnumerateWildcardNode
     )
     process {
+
         $scriptBlock = {
             param (
                 [System.String] $NodeName,
@@ -29,6 +30,8 @@ function Resolve-ConfigurationDataProperty {
             )
             ResolveLabVMProperties -NodeName $NodeName -ConfigurationData $ConfigurationData -NoEnumerateWildcardNode:$NoEnumerateWildcardNode;
         }
+
         & $lability $scriptBlock -NodeName $NodeName -ConfigurationData $ConfigurationData -NoEnumerateWildcardNode:$NoEnumerateWildcardNode;
+
     } #end process
 } #end function Resolve-ConfigurationDataProperty

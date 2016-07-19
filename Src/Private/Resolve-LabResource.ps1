@@ -25,6 +25,7 @@ function Resolve-Resource {
             )
             ResolveLabResource -ResourceId $ResourceId -ConfigurationData $ConfigurationData;
         }
+
         & $lability $scriptBlock -ResourceId $ResourceId -ConfigurationData $ConfigurationData;
 
     } #end process

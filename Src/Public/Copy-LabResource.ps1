@@ -22,7 +22,9 @@ function Copy-LabResource {
         [System.Management.Automation.SwitchParameter] $Force
     )
     begin {
+
         [System.Collections.Hashtable] $ConfigurationData = ConvertTo-ConfigurationData -ConfigurationData $ConfigurationData;
+
     }
     process {
         if (-not $PSBoundParameters.ContainsKey('NodeName')) {

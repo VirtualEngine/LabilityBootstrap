@@ -13,6 +13,8 @@ function Resolve-ConfigurationDataNode {
         $ConfigurationData
     )
     process {
+
         return $ConfigurationData.AllNodes.Where({ $_.NodeName -ne '*'}).NodeName;
+
     }
 } #end function Resolve-ConfigurationDataNode

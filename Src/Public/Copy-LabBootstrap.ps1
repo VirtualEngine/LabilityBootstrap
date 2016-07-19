@@ -20,16 +20,18 @@ function Copy-LabBootstrap {
         [System.String] $DestinationPath
     )
     begin {
+
         ## If we have only a secure string, create a PSCredential
         if ($PSCmdlet.ParameterSetName -eq 'Password') {
             $Credential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList 'LocalAdministrator', $Password;
         }
         if (-not $Credential) { throw ($localized.CannotProcessCommandError -f 'Credential'); }
         elseif ($Credential.Password.Length -eq 0) { throw ($localized.CannotBindArgumentError -f 'Password'); }
-    }
+
+}
     process {
 
-        $bootstrapPath = Join-Path -Path $defaults.ModuleRoot -ChildPath 'Lib\Bootstrap.ps1';
+        $bootstrapPath = Join-Path -Path $defaults.ModuleRoot -ChildPath 'Src\Private\Bootstrap.ps1';
         $unsecuredPassword = ConvertTo-InsecureString -Password $Credential.Password;
         $bootstrapContent = Get-Content -Path $bootstrapPath | ForEach-Object {
             $_ -replace '##PASSWORDPLACEHOLDER##', $unsecuredPassword;

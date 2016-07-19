@@ -50,6 +50,7 @@ function Expand-LabResource {
         $destinationResourcePath = Join-Path -Path $DestinationPath -ChildPath $resourceId;
 
         if (($resource.Expand) -and ($resource.Expand -eq $true)) {
+
             switch ([System.IO.Path]::GetExtension($resourceItemPath)) {
                 '.iso' {
                     if (-not (Test-Path -Path $destinationResourcePath)) {
@@ -80,8 +81,10 @@ function Expand-LabResource {
                     throw ($localized.ExpandNotSupportedError -f $resourceItem.Extension);
                 }
             } #end switch
+
         }
         else {
+
             $targetPath = Join-Path -Path $destinationRootPath -ChildPath $resourceItem.Name;
             if ((-not (Test-Path -Path $targetPath)) -or $Force) {
                 Write-Verbose ($localized.CopyingFileResource -f $resourceItem.FullName);

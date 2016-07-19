@@ -5,7 +5,8 @@ function ConvertTo-InsecureString {
 #>
     [CmdletBinding()]
     param (
-        [Parameter(Mandatory)] [ValidateNotNull()]
+        [Parameter(Mandatory)]
+        [ValidateNotNull()]
         [System.Security.SecureString] $Password
     )
     process {

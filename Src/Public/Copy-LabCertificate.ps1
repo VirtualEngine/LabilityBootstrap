@@ -18,7 +18,9 @@ function Copy-LabCertificate {
         [System.String[]] $NodeName
     )
     begin {
+
         [System.Collections.Hashtable] $ConfigurationData = ConvertTo-ConfigurationData -ConfigurationData $ConfigurationData;
+
     }
     process {
         if (-not $PSBoundParameters.ContainsKey('NodeName')) {

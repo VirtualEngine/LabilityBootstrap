@@ -15,25 +15,30 @@ function New-LabBootstrapIso {
         [System.String] $DestinationPath,
 
         ## Local administrator password of the VM. The username is NOT used.
-        [Parameter(ParameterSetName = 'PSCredential', ValueFromPipelineByPropertyName)] [ValidateNotNullOrEmpty()]
+        [Parameter(ParameterSetName = 'PSCredential', ValueFromPipelineByPropertyName)]
+        [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
         $Credential = (& $credentialCheckScriptBlock),
 
         ## Local administrator password of the VM.
-        [Parameter(Mandatory, ParameterSetName = 'Password', ValueFromPipelineByPropertyName)] [ValidateNotNullOrEmpty()]
+        [Parameter(Mandatory, ParameterSetName = 'Password', ValueFromPipelineByPropertyName)]
+        [ValidateNotNullOrEmpty()]
         [System.Security.SecureString] $Password,
 
         ## Source configurations/mofs path
-        [Parameter(ValueFromPipelineByPropertyName)] [ValidateNotNullOrEmpty()]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateNotNullOrEmpty()]
         [System.String] $Path = (Get-Item -Path $ConfigurationData).DirectoryName,
 
         ## ISO volume name (defaults to destination filename)
-        [Parameter(ValueFromPipelineByPropertyName)] [ValidateNotNullOrEmpty()]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateNotNullOrEmpty()]
         [System.String] $VolumeName,
 
         ## Temporary directory path
-        [Parameter(ValueFromPipelineByPropertyName)] [ValidateNotNullOrEmpty()]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateNotNullOrEmpty()]
         [System.String] $ScratchPath,
 
         ## Overwrite any existing resource files, e.g. expanded Iso/Zip archives
@@ -89,13 +94,13 @@ function New-LabBootstrapIso {
         Copy-LabConfiguration -ConfigurationData $configurationDataPath -DestinationPath $ScratchPath -Path $Path;
 
         $modulesPath = Join-Path -Path $ScratchPath -ChildPath $defaults.ModulesPath;
-        Copy-LabModule -ConfigurationData $configurationDataPath -DestinationPath $ScratchPath -ModuleType 'Module','DscResource';
+        [ref] $null = Copy-LabModule -ConfigurationData $configurationDataPath -DestinationPath $modulesPath -ModuleType 'Module','DscResource';
 
         Copy-LabResource -ConfigurationData $configurationDataPath -DestinationPath $ScratchPath -Force:$Force;
 
         Get-ChildItem -Path $Path -Filter ReadMe* |
             ForEach-Object {
-                Write-Verbose -Message ($loaclized.CopyingReadMeFile -f $_.Name);
+                Write-Verbose -Message ($localized.CopyingReadMeFile -f $_.Name);
                 Copy-Item -Path $_.FullName -Destination $ScratchPath
             }
 
@@ -109,4 +114,4 @@ function New-LabBootstrapIso {
 
     }
 
-} #end function New-LabIso
+} #end function New-LabBootstrapIso

@@ -11,8 +11,8 @@ ConvertFrom-StringData -StringData @'
     CopyingConfigurationDataFile      = Copying configuration data file '{0}'.
     CopyingConfigurationFile          = Copying configuration '{0}' to '{1}'.
     CopyingReadMeFile                 = Copying readme '{0}' file.
-    CopyingDscResourceModules         = Copying DSC resource modules to '{0}'.
-    CopyingPowerShellModules          = Copying PowerShell modules to '{0}'.
+    CopyingDscResourceModules         = Expanding DSC resource modules to '{0}'.
+    CopyingPowerShellModules          = Expanding PowerShell modules to '{0}'.
     WritingDvdProgress                = Writing DVD
     CreateDirectoryConfirmation       = Create Directory
     CopyFileConfirmation              = Copy File

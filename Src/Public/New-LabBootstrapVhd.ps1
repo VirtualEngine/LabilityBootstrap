@@ -13,31 +13,35 @@ function New-LabBootstrapVhd {
         ## Target Lability bootstrap VHD(X) file path
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [System.String] $DestinationPath,
-        
+
         ## Local administrator password of the VM. The username is NOT used.
-        [Parameter(ParameterSetName = 'PSCredential', ValueFromPipelineByPropertyName)] [ValidateNotNullOrEmpty()]
+        [Parameter(ParameterSetName = 'PSCredential', ValueFromPipelineByPropertyName)]
+        [ValidateNotNullOrEmpty()]
         [System.Management.Automation.PSCredential]
         [System.Management.Automation.CredentialAttribute()]
         $Credential = (& $credentialCheckScriptBlock),
 
         ## Local administrator password of the VM.
-        [Parameter(Mandatory, ParameterSetName = 'Password', ValueFromPipelineByPropertyName)] [ValidateNotNullOrEmpty()]
+        [Parameter(Mandatory, ParameterSetName = 'Password', ValueFromPipelineByPropertyName)]
+        [ValidateNotNullOrEmpty()]
         [System.Security.SecureString] $Password,
-        
-        ## Source configurations/mofs path 
-        [Parameter(ValueFromPipelineByPropertyName)] [ValidateNotNullOrEmpty()]
+
+        ## Source configurations/mofs path
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateNotNullOrEmpty()]
         [System.String] $Path = (Get-Item -Path $ConfigurationData).DirectoryName,
-        
+
         ## VHD(X) volume name (defaults to destination filename)
-        [Parameter(ValueFromPipelineByPropertyName)] [ValidateNotNullOrEmpty()]
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [ValidateNotNullOrEmpty()]
         [System.String] $VolumeName,
-        
+
         ## Overwrite any existing resource files, e.g. expanded Iso/Zip archives
         [Parameter(ValueFromPipelineByPropertyName)]
         [System.Management.Automation.SwitchParameter] $Force
     )
     begin {
-        
+
         ## If we have only a secure string, create a PSCredential
         if ($PSCmdlet.ParameterSetName -eq 'Password') {
             $Credential = New-Object -TypeName 'System.Management.Automation.PSCredential' -ArgumentList 'LocalAdministrator', $Password;
@@ -48,9 +52,11 @@ function New-LabBootstrapVhd {
         elseif ($Credential.Password.Length -eq 0) {
             throw ($localized.CannotBindArgumentError -f 'Password');
         }
-        
+
     } #end begin
     process {
-        
+
+
+
     } #end process
 } #end function New-LabBootstrapVhd

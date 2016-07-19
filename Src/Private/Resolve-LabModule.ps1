@@ -1,7 +1,7 @@
 function Resolve-LabModule {
 <#
     .SYNOPSIS
-
+        Returns modules defined in the configuration data
 #>
     [CmdletBinding()]
     [OutputType([System.Collections.Hashtable])]
@@ -29,8 +29,9 @@ function Resolve-LabModule {
                 [System.Collections.Hashtable] $ConfigurationData,
                 [System.String] $ModuleType
             )
-            Resolve-LabModule -NodeName $NodeName -ConfigurationData $ConfigurationData -ModuleType $ModuleType;
+            ResolveLabModule -NodeName $NodeName -ConfigurationData $ConfigurationData -ModuleType $ModuleType;
         }
+
         & $lability $scriptBlock -NodeName $NodeName -ConfigurationData $ConfigurationData -ModuleType $ModuleType;
 
     } #end process

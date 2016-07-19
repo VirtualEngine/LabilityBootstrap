@@ -13,13 +13,15 @@ function Expand-LabIsoResource {
         [System.String] $DestinationPath
     )
     process {
+
         $scriptBlock = {
             param (
                 [System.String] $Path,
                 [System.String] $DestinationPath
             )
-            Expand-LabIsoResource -Path $Path -DestinationPath $DestinationPath;
+            ExpandIso -Path $Path -DestinationPath $DestinationPath;
         }
         & $lability $scriptBlock -Path $Path -DestinationPath $DestinationPath;
+
     } #end process
 } #end function Expand-LabIsoResource

@@ -23,8 +23,9 @@ function Expand-LabModule {
                 [System.Collections.Hashtable[]] $Module,
                 [System.String] $DestinationPath
             )
-            Expand-LabModule -Module $Module -DestinationPath $DestinationPath -Clean;
+            ExpandModuleCache -Module $Module -DestinationPath $DestinationPath -Clean;
         }
+
         & $lability $scriptBlock -Module $Module -DestinationPath $DestinationPath;
 
     } #end process

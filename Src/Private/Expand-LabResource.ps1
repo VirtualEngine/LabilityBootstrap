@@ -30,7 +30,10 @@ function Expand-LabResource {
     process {
         $resource = Resolve-Resource -ResourceId $ResourceId -ConfigurationData $ConfigurationData;
         $resourceItemPath = Join-Path -Path $ResourcePath -ChildPath $resource.Id;
-        if ($resource.Filename) {
+        if ($resource.IsLocal) {
+            $resourceItemPath = Resolve-Path -Path $resource.Filename;
+        }
+        elseif ($resource.Filename) {
             $resourceItemPath = Join-Path -Path $ResourcePath -ChildPath $resource.Filename;
         }
 
@@ -88,7 +91,7 @@ function Expand-LabResource {
             $targetPath = Join-Path -Path $destinationRootPath -ChildPath $resourceItem.Name;
             if ((-not (Test-Path -Path $targetPath)) -or $Force) {
                 Write-Verbose ($localized.CopyingFileResource -f $resourceItem.FullName);
-                Copy-Item -Path $resourceItem.FullName -Destination $destinationRootPath -Force -Verbose:$false;
+                Copy-Item -Path $resourceItem.FullName -Destination $destinationRootPath -Force -Recurse -Verbose:$false;
             }
             else {
                 Write-Verbose ($localized.SkippingFileResource -f $ResourceItem.FullName);

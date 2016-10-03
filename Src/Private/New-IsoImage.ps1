@@ -192,7 +192,7 @@ function New-IsoImage {
                     if ($percentComplete -gt 100) {
                         $percentComplete = 0;
                     }
-                    $status = 'Elapsed: {0}' -f $stopWatch.Elapsed.ToString());
+                    $status = 'Elapsed: {0}' -f $stopWatch.Elapsed.ToString();
                     Write-Progress -Id $job.Id -Activity $activity -Status $status -PercentComplete $percentComplete;
                     Receive-Job -Job $job
                     Start-Sleep -Milliseconds 500;

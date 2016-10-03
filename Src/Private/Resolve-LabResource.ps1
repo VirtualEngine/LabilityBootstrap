@@ -1,4 +1,4 @@
-function Resolve-Resource {
+function Resolve-LabResource {
 <#
     .SYNOPSIS
         Resolves a Lability custom resource from configuration data.
@@ -29,4 +29,4 @@ function Resolve-Resource {
         & $lability $scriptBlock -ResourceId $ResourceId -ConfigurationData $ConfigurationData;
 
     } #end process
-} #end function Resolve-Resource
+} #end function Resolve-LabResource

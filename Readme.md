@@ -11,7 +11,7 @@ model; for example using VMware Workstation or Oracle VirtualBox.
 resources and configuration files into a VM's VHD(X) file during the provisioning
 process. __LabilityBootstrap__ works by creating a self-contained .ISO file containing
 all the required resources. This resulting .ISO file can then be mounted within each
-(virtual) machine to manually bootstrap the node's deployment.
+(virtual) machine to manually bootstrap a node's deployment.
 
 _Note: it is possible to manually bootstrap virtual machine in either Amazon Web Services or
 Microsoft Azure!_
@@ -20,8 +20,8 @@ Microsoft Azure!_
 
 ### Unreleased
 
-* Added New-LabIso 
-
+* Sets PowerShell console colours in Bootstrap
+* Adds IsLocal resource support
 
 
 [__Lability__ image/logo attribution credit](https://openclipart.org/image/300px/svg_to_png/22734/papapishu-Lab-icon-1.png)

@@ -19,83 +19,104 @@ function Expand-LabResource {
         [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
         [System.String] $DestinationPath,
 
-        ## Source resource path
-        [Parameter(Mandatory, ValueFromPipelineByPropertyName)]
-        [System.String] $ResourcePath,
-
         ## Overwrite any existing resource files
         [Parameter(ValueFromPipelineByPropertyName)]
         [System.Management.Automation.SwitchParameter] $Force
     )
     process {
-        $resource = Resolve-Resource -ResourceId $ResourceId -ConfigurationData $ConfigurationData;
-        $resourceItemPath = Join-Path -Path $ResourcePath -ChildPath $resource.Id;
-        if ($resource.IsLocal) {
-            $resourceItemPath = Resolve-Path -Path $resource.Filename;
-        }
-        elseif ($resource.Filename) {
-            $resourceItemPath = Join-Path -Path $ResourcePath -ChildPath $resource.Filename;
-        }
 
-        if (-not (Test-Path -Path $resourceItemPath)) {
-            throw ($localized.ResourceNotFoundError -f $resourceItemPath);
-        }
-        else {
-            $resourceItem = Get-Item -Path $resourceItemPath;
-        }
+        $hostDefaults = Get-ConfigurationData -Configuration Host;
+        $resourcePath = $hostDefaults.ResourcePath;
+        $resource = Resolve-LabResource -ResourceId $ResourceId -ConfigurationData $ConfigurationData;
+        $resourceSourcePath = Join-Path $resourcePath -ChildPath $resource.Id;
 
-        if ($resource.DestinationPath -and (-not [System.String]::IsNullOrEmpty($resource.DestinationPath))) {
-            ## We can't account for custom destination paths here - they'll need to be accounted for on
-            ## the target node before invoking the configuration. Ensure they're not expanded here.
-        }
+        if ($resource.Filename) {
 
-        $destinationRootPath = $DestinationPath;
-        $destinationResourcePath = Join-Path -Path $DestinationPath -ChildPath $resourceId;
+            $resourceSourcePath = Join-Path $resourcePath -ChildPath $resource.Filename;
+            if ($resource.IsLocal) {
+
+                $resourceSourcePath = Resolve-Path -Path $resource.Filename;
+            }
+        }
+        $resourceItem = Get-Item -Path $resourceSourcePath;
+
+        $resourceRootDestinationPath = Join-Path -Path $DestinationPath -ChildPath $hostDefaults.ResourceShareName;
+        $resourceDestinationPath = Join-Path -Path $resourceRootDestinationPath -ChildPath $resource.Id;
 
         if (($resource.Expand) -and ($resource.Expand -eq $true)) {
 
-            switch ([System.IO.Path]::GetExtension($resourceItemPath)) {
+            switch ([System.IO.Path]::GetExtension($resourceSourcePath)) {
+
                 '.iso' {
-                    if (-not (Test-Path -Path $destinationResourcePath)) {
-                        [ref] $null = New-Item -Path $destinationResourcePath -ItemType Directory -Force;
+
+                    if (-not (Test-Path -Path $resourceDestinationPath)) {
+
+                        [ref] $null = New-Item -Path $resourceDestinationPath -ItemType Directory -Force;
                     }
-                    if (((Get-ChildItem -Path $destinationResourcePath).Count -eq 0) -or $Force) {
+                    if (((Get-ChildItem -Path $resourceDestinationPath).Count -eq 0) -or $Force) {
+
                         ## Only expand resource if there's nothing there or we're forcing it
-                        Write-Verbose ($localized.ExpandingIsoResource -f $ResourceItem.FullName);
-                        Expand-LabIsoResource -Path $resourceItem.FullName -DestinationPath $destinationResourcePath;
+                        Write-Verbose ($localized.ExpandingIsoResource -f $resourceItem.FullName);
+                        Expand-LabIsoResource -Path $resourceItem.FullName -DestinationPath $resourceDestinationPath;
                     }
                     else {
-                        Write-Verbose ($localized.SkippingIsoResource -f $ResourceItem.FullName);
+
+                        Write-Verbose ($localized.SkippingIsoResource -f $resourceItem.FullName);
                     }
                 }
+
                 '.zip' {
-                    if (-not (Test-Path -Path $destinationResourcePath)) {
-                        [ref] $null = New-Item -Path $destinationResourcePath -ItemType Directory -Force;
+
+                    if (-not (Test-Path -Path $resourceDestinationPath)) {
+
+                        [ref] $null = New-Item -Path $resourceDestinationPath -ItemType Directory -Force;
                     }
-                    if (((Get-ChildItem -Path $destinationResourcePath).Count -eq 0) -or $Force) {
-                        Write-Verbose ($localized.ExpandingZipArchive -f $ResourceItem.FullName);
-                        [ref] $null = Expand-ZipArchive -Path $resourceItem.FullName -DestinationPath $destinationResourcePath -Verbose:$false;
+                    if (((Get-ChildItem -Path $resourceDestinationPath).Count -eq 0) -or $Force) {
+
+                        Write-Verbose ($localized.ExpandingZipArchive -f $resourceItem.FullName);
+                        [ref] $null = Expand-ZipArchive -Path $resourceItem.FullName -DestinationPath $resourceDestinationPath -Verbose:$false;
                     }
                     else {
-                        Write-Verbose ($localized.SkipingZipArchive -f $ResourceItem.FullName);
+
+                        Write-Verbose ($localized.SkippingZipArchive -f $resourceItem.FullName);
                     }
                 }
                 Default {
+
                     throw ($localized.ExpandNotSupportedError -f $resourceItem.Extension);
                 }
+
             } #end switch
-
         }
-        else {
+        elseif ($resource.Filename) {
 
-            $targetPath = Join-Path -Path $destinationRootPath -ChildPath $resourceItem.Name;
-            if ((-not (Test-Path -Path $targetPath)) -or $Force) {
+            $resourceDestinationPath = Join-Path -Path $resourceRootDestinationPath -ChildPath $resource.Filename;
+            if ($resource.IsLocal) {
+
+                $resourceRelativePath = ($resource.Filename).TrimStart('.');
+                $resourceDestinationPath = Join-Path -Path $resourceRootDestinationPath -ChildPath $resourceRelativePath;
+
+                ## Always replace local resources..
+                if (Test-Path -Path $resourceDestinationPath) {
+                    Write-Verbose -Message ($localized.RemovingStaleResource -f $resourceDestinationPath);
+                    Remove-Item -Path $resourceDestinationPath -Force -Recurse -Verbose:$false;
+                }
+            }
+
+            if ((-not (Test-Path -Path $resourceDestinationPath)) -or $Force) {
+
                 Write-Verbose ($localized.CopyingFileResource -f $resourceItem.FullName);
-                Copy-Item -Path $resourceItem.FullName -Destination $destinationRootPath -Force -Recurse -Verbose:$false;
+                Copy-Item -Path $resourceItem.FullName -Destination $resourceDestinationPath -Force -Recurse -Verbose:$false;
             }
             else {
+
                 Write-Verbose ($localized.SkippingFileResource -f $ResourceItem.FullName);
             }
         }
+        else {
+
+            throw ($localized.NoFilenameDefinedError -f $resource.Id);
+        }
+
     } #end process
 } #end function Expand-LabResource

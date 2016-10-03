@@ -4,6 +4,7 @@ ConvertFrom-StringData -StringData @'
     SkippingIsoResource               = Skipping ISO resource '{0}'.
     ExpandingZipArchive               = Expanding Zip archive '{0}'.
     SkippingZipArchive                = Skipping Zip archive '{0}'.
+    RemovingStaleResource             = Removing stale resource '{0}'.
     CopyingFileResource               = Copying file resource '{0}'.
     SkippingFileResource              = Skipping file resource '{0}'.
     CopyingExpandingResources         = Copying/expanding resource '{0}' to '{1}'.
@@ -25,11 +26,22 @@ ConvertFrom-StringData -StringData @'
     UsingScratchPath                  = Using scratch path '{0}'.
     UsingFilename                     = Using filename '{0}'.
     UsingOutputPath                   = Using output path '{0}'.
+    DownloadingLabilityModules        = Downloading required Lability modules.
+    DownloadingLabilityDscResources   = Downloading required Lability DSC resources.
+    DownloadingLabilityResources      = Downloading required Lability binary resources.
+    RemovingConfigurationDirectory    = Removing existing configuration directory '{0}'.
+    CreatingConfigurationDirectory    = Creating configuration directory '{0}'.
+    CreatingResourceDirectory         = Creating resource directory '{0}'.
+    CopyingConfigurationBootstrap     = Copying bootstrap file '{0}'.
+    CreatingDestinationDirectory      = Creating destination directory '{0}'.
+    CreatingIsoRootDirectory          = Creating ISO root directory '{0}'.
+    IsoFileCreatedIn                  = ISO file '{0}' created in '{1}'.
 
     GitNotFoundWarning                = GIT.EXE was not found.
     InvalidGitRepositoryWarning       = Path '{0}' is an invalid Git repository.
 
     InvalidDestinationPathError       = Invalid destination path '{0}' specified.
+    NoFilenameDefinedError            = Resource '{0}' has no 'Filename' defined.
     ExpandNotSupportedError           = Expand operation not supported on '{0}' file type.
     InvalidConfigurationDataFileError = Invalid configuration data file '{0}'.
     InvalidConfigurationDataType      = Invalid configuration data type '{0}'.
@@ -37,4 +49,6 @@ ConvertFrom-StringData -StringData @'
     CannotProcessCommandError         = Cannot process command because of one or more missing mandatory parameters: {0}.
     CannotBindArgumentError           = Cannot bind argument to parameter '{0}' because it is an empty string.
     InvalidDirectoryPathError         = Invalid directory path '{0}'.
+    InvalidFileExtensionError         = File '{0}' is invalid. The file path should have the '{1}' extension.
+    PathIsNotDirectoryError           = Path '{0}' is not a directory.
 '@

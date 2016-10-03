@@ -23,6 +23,7 @@ Microsoft Azure!_
 * Sets PowerShell console colours in Bootstrap
 * Adds IsLocal resource support
 * Adds elapsed time to New-IsoImage
+* Implements multiple configurations in a single ISO
 
 
 [__Lability__ image/logo attribution credit](https://openclipart.org/image/300px/svg_to_png/22734/papapishu-Lab-icon-1.png)

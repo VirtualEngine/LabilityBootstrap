@@ -157,7 +157,7 @@ function New-IsoImage {
 
         [Parameter()]
         [ValidateNotNullOrEmpty()]
-        [System.String] $VolumeName = 'New-ISO',
+        [System.String] $VolumeName = 'LabilityBootstrap',
 
         [Parameter()]
         [System.Management.Automation.SwitchParameter] $AsJob
@@ -173,7 +173,7 @@ function New-IsoImage {
     }
     end {
 
-        if ($PSCmdlet.ShouldProcess($DestinationPath, 'New-LabIso')) {
+        if ($PSCmdlet.ShouldProcess($DestinationPath, 'New-IsoImage')) {
 
             $startJobParams = @{
                 ScriptBlock = $writeDVDScriptBlock;
@@ -183,20 +183,27 @@ function New-IsoImage {
             $activity = $localized.WritingDvdProgress;
 
             if (-not $AsJob) {
-                while ($Job.HasMoreData -or $Job.State -eq 'Running') {
+
+                $stopWatch = [System.Diagnostics.Stopwatch]::StartNew();
+
+                while ($job.HasMoreData -or $job.State -eq 'Running') {
+
                     $percentComplete++;
                     if ($percentComplete -gt 100) {
                         $percentComplete = 0;
                     }
-                    Write-Progress -Id $job.Id -Activity $activity -Status $DestinationPath -PercentComplete $percentComplete;
-                    Receive-Job -Job $Job
+                    $status = 'Elapsed: {0}' -f $stopWatch.Elapsed.ToString());
+                    Write-Progress -Id $job.Id -Activity $activity -Status $status -PercentComplete $percentComplete;
+                    Receive-Job -Job $job
                     Start-Sleep -Milliseconds 500;
                 }
 
+                $stopWatch.Stop();
                 Write-Progress -Id $job.Id -Activity $activity -Completed;
                 $job | Receive-Job;
             }
             else {
+
                 return $job;
             }
 

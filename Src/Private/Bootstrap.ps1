@@ -412,12 +412,18 @@ $mofContent = $mofContent -replace 'Local Area Connection', $interfaceAlias;
 $resourceReplacement = ('{0}\' -f $ResourcePath).Replace('\','\\');
 $mofContent = $mofContent -replace 'C:\\\\Resources\\\\', $resourceReplacement;
 
+## Replace '$ResourcePath = 'C:\\Resources'' references with "BootstrapDrive:\\Resources" reference
+$resourceReplacement = ('{0}' -f $ResourcePath).Replace('\','\\');
+$mofContent = $mofContent -replace "\`$ResourcePath\s?=\s?'C:\\\\Resources'", "`$ResourcePath ='$resourceReplacement'";
+
+## Write the %TEMP%\localhost.mof file
+$mofContent | Set-Content -Path $localhostMofPath -Encoding Unicode -Force -Confirm:$false;
+
 if (-not $PrepareOnly) {
 
     Write-Host ("Starting Configuration...") -ForegroundColor Green;
     if ($PSCmdlet.ShouldProcess($sourceMofPath, 'Start Configuration')) {
 
-        $mofContent | Set-Content -Path $localhostMofPath -Encoding Unicode -Force -Confirm:$false;
         Start-DscConfiguration -Path $tempPath -Wait -Verbose -Force -ErrorAction Stop;
 
     } #end configuration

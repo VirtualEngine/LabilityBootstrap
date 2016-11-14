@@ -77,7 +77,7 @@ function Add-LabIsoConfiguration {
         $configurationRootPath = Join-Path -Path $configurationsRootPath -ChildPath $ConfigurationName;
         if (Test-Path -Path $configurationRootPath) {
             Write-Verbose -Message ($localized.RemovingConfigurationDirectory -f $configurationRootPath);
-            Remove-Item -Path $configurationPath -Recurse -Force -Confirm:$false;
+            Remove-Item -Path $configurationRootPath -Recurse -Force -Confirm:$false;
         }
         Write-Verbose -Message ($localized.CreatingConfigurationDirectory -f $configurationRootPath);
         [ref] $null = New-Item -Path $configurationRootPath -ItemType Directory -Force;
